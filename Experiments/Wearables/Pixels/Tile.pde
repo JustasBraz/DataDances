@@ -5,6 +5,8 @@ class Tile {
   int col;
   int prevCol;
   int id=0;
+  int lastReversed=millis();
+
   Tile (float tempX, float tempY, float tempSide, int tempCol) {
     x = tempX;
     y = tempY;
@@ -12,8 +14,9 @@ class Tile {
     col = tempCol;
   }
 
-    void display() {
+  void display() {
     //stroke(220);
+    rectMode(CENTER);
     noStroke();
     fill(col);
     rect (x, y, w, w);
@@ -22,26 +25,40 @@ class Tile {
   void black() {
     col = color (0) ;
   }
-  
-  void checkMouse(){
- if (mouseX > x & mouseX < x+w & mouseY > y & mouseY < y+w) {
-   col=color(0);
-   id=1;
-   prevCol=col;
- } 
- }
- 
- void displayID(){
-   if(mousePressed){
-   
-   fill(0);
-   stroke(0);
-   text(id, x,y);
-   noStroke();
-   col=color(200);
- }
- else{
-   col=prevCol;
- }
- }
+
+  void checkMouse() {
+    if (mouseX > x & mouseX < x+w & mouseY > y & mouseY < y+w) {
+      int waitTime=1000;
+      if (id==0&&(abs(millis()-lastReversed)>waitTime)) {
+        col=color(0);
+        id=1;
+        this.lastReversed=millis();
+      }
+
+      if ((id==1)&&abs((millis()-lastReversed))>waitTime) {
+        col=color(255);
+        id=0;
+        lastReversed=millis();
+      }
+
+      println(x, y, abs((millis()-this.lastReversed)));
+    }
+  }
+
+  void displayID() {
+    int off=5;
+
+
+    fill(0);
+    textSize(22);
+
+    if (this.id==1) {
+      fill(255);
+    } else {
+      fill(0);
+    }
+    fill(255, 0, 0);
+    text(id, x-off, y+off);
+    noStroke();
+  }
 }

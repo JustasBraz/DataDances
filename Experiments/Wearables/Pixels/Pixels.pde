@@ -7,9 +7,9 @@ void setup() {
   size(800, 800);
   cols=ceil(width/step);
   rows=ceil(height/step);
-  grid = new Tile[cols][rows]; //the array dimensions are equal to n.of rows/columns
+  grid = new Tile[cols][rows];
 
-  //loop through cols and rows
+  //generate grid
   for (int i=0; i<cols; i++) {
     for (int j=0; j<rows; j++) {
       //initiate objects
@@ -27,10 +27,19 @@ void draw() {
       grid[i][j].display();
       grid[i][j].checkMouse();
       
-      //if(mousePressed){
+      if(mousePressed){
         grid[i][j].displayID();
-      //}
+      }
     }
   }
- //grid[4][4].black();
+
+}
+
+void record(){
+  
+   if(frameCount%17==0){
+ saveFrame("GridDemoImg/"+frameCount+".png");
+  }
+ grid[7][6].black();
+
 }
