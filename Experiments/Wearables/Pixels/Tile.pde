@@ -6,7 +6,7 @@ class Tile {
   int prevCol;
   int id=0;
   int lastReversed=millis();
-
+  float nudge;
   Tile (float tempX, float tempY, float tempSide, int tempCol) {
     x = tempX;
     y = tempY;
@@ -15,9 +15,9 @@ class Tile {
   }
 
   void display() {
-    //stroke(220);
-    rectMode(CENTER);
-    noStroke();
+    stroke(200);
+   // rectMode(CENTER);
+    //noStroke();
     fill(col);
     rect (x, y, w, w);
   }
@@ -30,7 +30,7 @@ class Tile {
     if (mouseX > x & mouseX < x+w & mouseY > y & mouseY < y+w) {
       int waitTime=1000;
       if (id==0&&(abs(millis()-lastReversed)>waitTime)) {
-        col=color(0);
+        col=color(100);
         id=1;
         this.lastReversed=millis();
       }

@@ -4,24 +4,18 @@ int cols;
 int rows;
 int step=20;
 void setup() {
-  size(800, 800);
-  cols=ceil(width/step);
-  rows=ceil(height/step);
-  grid = new Tile[cols][rows];
-
-  //generate grid
-  for (int i=0; i<cols; i++) {
-    for (int j=0; j<rows; j++) {
-      //initiate objects
-      grid[i][j] = new Tile (i*cols, j*cols, cols, 255);
-    }
-  }
+  size(1000, 800);
+initTiles();
 }
 
 
 void draw() {
   background(255);
-  for (int i=0; i<cols; i++) {
+  //translate(width/2, height/2);
+  displayTiles();
+}
+void displayTiles(){
+for (int i=0; i<cols; i++) {
     for (int j=0; j<rows; j++) {
       //show me them goodies
       grid[i][j].display();
@@ -34,7 +28,20 @@ void draw() {
   }
 
 }
-
+void initTiles(){
+  cols=ceil(width/step);
+  rows=ceil(height/step);
+  grid = new Tile[cols][rows];
+  
+  //generate grid
+  for (int i=0; i<cols; i++) {
+    for (int j=0; j<rows; j++) {
+      //initiate objects
+      float nudge=step/2;
+      grid[i][j] = new Tile (i*step+nudge, j*step+nudge, step, 255);
+    }
+  }
+}
 void record(){
   
    if(frameCount%17==0){

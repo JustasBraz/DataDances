@@ -43,6 +43,8 @@ boolean swing;
 
 String session;
 
+boolean SIMULATION= true;
+boolean RECORDING=false;
 void setup()
 { 
   keysDown = new HashSet<Character>();
@@ -62,20 +64,16 @@ void setup()
   //otherwise, to conduct tests in simulated mode, comment
   //the following two lines out:  
 
-   Port_1 = new Serial(this, "COM4", 9600); //9600 as it must match the baud rate on the Arduinos
-   Port_1.bufferUntil(13); //13 is the ASCII linefeed value 
-
+  if (!SIMULATION) {
+    attemptConnection("COM4", 9600);
+  }
   //The folder to save screen-captured images
   session="test2/";
 
   soundSetup();
 
   //Setting up GUI and the spacing between buttons
-  int spacing=10;
-  for (int i=0; i<8; i++) {
-    Buttons.add(new Button(-width/2+50, -height/2+(i*50+50)+spacing, i));
-    spacing+=20;
-  }
+  initGUI();
 
   //Initiating the array that will keep the 8 sensor values and 
   //transform them into XY coordinates
@@ -92,11 +90,12 @@ void draw()
   //IF USING THE ACTUAL BASE STATION, LEAVE UNCOMMENTED
   //otherwise, to conduct tests in simulated mode, comment
   //the following line out: 
-
-   Port_1.write('0');
-
+  if (SIMULATION) {
+    simulateData();
+  } else {
+   maintainConnections();
+  }
   //and uncomment the following line:
-  //simulateData();
 
   background(255);
   translate(width/2, height/2);
@@ -153,19 +152,23 @@ void draw()
   processKeys();
   GUI();
 
-  //uncomment for saving every 29th frame
-  //if (frameCount%29==0) {
-  //  saveFrame(session+frameCount+".jpg");
-  //}
+  if (RECORDING) {
+    record();
+  }
 } 
-
+void attemptConnection(String COM, int baud) {
+  Port_1 = new Serial(this, COM, baud); //9600 as it must match the baud rate on the Arduinos
+  Port_1.bufferUntil(13); //13 is the ASCII linefeed value
+}
 //Function displays end point coordinates
 void drawDots() {
   for (Dot d : Dots) {
     d.display();
   }
 }
-
+void maintainConnections() {
+ Port_1.write('0');
+}
 //draws an ellipse on screen and makes the screen flash if all ent points
 //are withing the perimeter of the ellipse
 void matchingShape() {
@@ -180,6 +183,18 @@ void matchingShape() {
   }
   drawEllipse();
   fill(0, 102, 153, 10);
+}
+void record(){
+if (frameCount%29==0) {
+      saveFrame(session+frameCount+".jpg");
+    }
+}
+void initGUI() {
+  int spacing=10;
+  for (int i=0; i<8; i++) {
+    Buttons.add(new Button(-width/2+50, -height/2+(i*50+50)+spacing, i));
+    spacing+=20;
+  }
 }
 
 void GUI() {
@@ -576,7 +591,7 @@ void processKeys() {
   if (keysDown.contains('x')) {
     drawEllipse();
   }
-  
+
   //changes the mode of display
   if (keyPressed) {    
     switch(key) {
