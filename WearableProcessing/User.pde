@@ -59,7 +59,7 @@ class User {
     if (pen=="Point") {
       stroke(getRainbow(RGB_bits), 360, 360, alpha);
 
-      strokeWeight(20);//radius is dependent on movementt
+      strokeWeight(30);//radius is dependent on movementt
       //findDelta(yaw*scale, pitch*scale) ;
 
       point(yaw*scale, pitch*scale);

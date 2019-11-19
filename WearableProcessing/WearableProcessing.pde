@@ -30,8 +30,8 @@ Tile [][] lowResgrid;
 Tile [][] highResgrid;
 
 boolean SIMULATION= false;
-boolean RECORDING=true;
-String session="test11_19/Pixels/";
+boolean RECORDING=false;
+String session="test11_19/RGB_4bits/";
 
 int colsHighRes;
 int rowsHighRes;
@@ -120,7 +120,7 @@ void draw()
       break;
     case 4:
       //Rainbow3
-      users[userID].move(4, "Line");
+      users[userID].move(4, "Point");
       break;
     case 5:
       //Rainbow4
