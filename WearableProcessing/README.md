@@ -20,3 +20,6 @@
 
 ## 8bit
 ![8bit](https://github.com/JustasBraz/DataDances/blob/master/WearableProcessing/showcase/8bits.gif  "8bit")
+
+## Generic Line
+![Line_Generic](https://github.com/JustasBraz/DataDances/blob/master/WearableProcessing/showcase/Line_Generic.gif  "Line_Generic")
