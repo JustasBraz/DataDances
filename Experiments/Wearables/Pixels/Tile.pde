@@ -15,7 +15,7 @@ class Tile {
   }
 
   void display() {
-    stroke(200);
+    //stroke(200);
    // rectMode(CENTER);
     //noStroke();
     fill(col);

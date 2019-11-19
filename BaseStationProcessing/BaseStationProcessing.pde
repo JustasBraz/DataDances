@@ -632,14 +632,6 @@ void processKeys() {
   }
 }
 
-void modeButtons() {
-
-  fill(230);
-  ellipse(-width/2+50, -height/2+110, 50, 50);
-  ellipse(-width/2+50, -height/2+170, 50, 50);
-  ellipse(-width/2+50, -height/2+230, 50, 50);
-  noFill();
-}
 void simulateData() {
   Pos1=map(noise(init1+simulateStep), 0, 1, 0, 500);
   Pos2=map(noise(init2+simulateStep), 0, 1, 0, 500);

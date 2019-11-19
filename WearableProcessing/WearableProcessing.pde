@@ -12,7 +12,6 @@ int No_Users=1;
 String [] verifiedPorts={"COM4"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
 
 
-String session="test7/";
 
 User[] users;
 Serial [] myPorts;
@@ -31,7 +30,8 @@ Tile [][] lowResgrid;
 Tile [][] highResgrid;
 
 boolean SIMULATION= false;
-boolean RECORDING=false;
+boolean RECORDING=true;
+String session="test11_19/Pixels/";
 
 int colsHighRes;
 int rowsHighRes;
@@ -196,7 +196,7 @@ void attemptConnection() {
   }
 }
 void record() {
-  if (frameCount%29==0) {
+  if (frameCount%13==0) {
     saveFrame(session+frameCount+".jpg");
   }
 }
