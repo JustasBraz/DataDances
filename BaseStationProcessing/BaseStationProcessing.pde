@@ -33,6 +33,10 @@ float init5=random(0, 20000);
 float init6=random(0, 20000);
 float init7=random(0, 20000);
 float init8=random(0, 20000);
+
+float [] inputs =new float [8];//={Pos1, Pos2, Pos3, Pos4, Pos5, Pos6, Pos7, Pos8};
+int [] offsetAngles={135, 180, 225, 270, 315, 360, 45, 90};
+
 float simulateStep=0;
 
 int mode=-1;
@@ -77,9 +81,17 @@ void setup()
 
   //Initiating the array that will keep the 8 sensor values and 
   //transform them into XY coordinates
-  for (int i =0; i<8; i++) {
-    Dots.add(new Dot(0, 0, i));
-  }
+  //for (int i =0; i<8; i++) {
+  //  Dots.add(new Dot(0, 0, i));
+  Dots.add(new Dot (new PVector(0, 1), 1));
+  Dots.add(new Dot (new PVector(cos(radians(135)), sin(radians(135))), 2));
+  Dots.add(new Dot (new PVector(-1, 0), 3));
+  Dots.add(new Dot (new PVector(cos(radians(225)), sin(radians(225))), 4));
+  Dots.add(new Dot (new PVector(0, -1), 5));
+  Dots.add(new Dot (new PVector(cos(radians(315)), sin(radians(315))), 6));
+  Dots.add(new Dot (new PVector(1, 0), 7));
+  Dots.add(new Dot (new PVector(cos(radians(45)), sin(radians(45))), 8));
+  //}
 
   println("Entering draw");
   delay(1000);
@@ -93,12 +105,15 @@ void draw()
   if (SIMULATION) {
     simulateData();
   } else {
-   maintainConnections();
+    maintainConnections();
   }
   //and uncomment the following line:
 
   background(255);
   translate(width/2, height/2);
+
+  processKeys();
+  GUI("Regular");
 
   //Selects the active mode (activated but the buttons on screen):
   switch(mode) {
@@ -120,8 +135,11 @@ void draw()
     curvedMode();
     break;
   case 4:
+    background(0);
     ac.stop();
     binaryMode();
+    GUI("inverse");
+
     break;
   case 5:
     ac.start();
@@ -149,9 +167,6 @@ void draw()
     break;
   }
 
-  processKeys();
-  GUI();
-
   if (RECORDING) {
     record();
   }
@@ -167,7 +182,7 @@ void drawDots() {
   }
 }
 void maintainConnections() {
- Port_1.write('0');
+  Port_1.write('0');
 }
 //draws an ellipse on screen and makes the screen flash if all ent points
 //are withing the perimeter of the ellipse
@@ -184,10 +199,10 @@ void matchingShape() {
   drawEllipse();
   fill(0, 102, 153, 10);
 }
-void record(){
-if (frameCount%29==0) {
-      saveFrame(session+frameCount+".jpg");
-    }
+void record() {
+  if (frameCount%29==0) {
+    saveFrame(session+frameCount+".jpg");
+  }
 }
 void initGUI() {
   int spacing=10;
@@ -197,11 +212,11 @@ void initGUI() {
   }
 }
 
-void GUI() {
+void GUI(String colorMode) {
   textSize(18);
   for (Button b : Buttons ) {
 
-    if (b.activate()&&mousePressed) {
+    if (b.activate(colorMode)&&mousePressed) {
       mode=b.getMode();
       visualAid=b.getMode();
     }
@@ -353,45 +368,45 @@ void checkOctaveThreshold(float input, int sensor) {
 }
 
 void binaryMode() {
-  stroke(160);
-  strokeWeight(1);
 
-  checkBinaryThreshold(Pos1);
-  line(0, 0, 0, Pos1);
 
-  checkBinaryThreshold(Pos2);
-  line(0, 0, cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-
-  checkBinaryThreshold(Pos3);
-  line(0, 0, -Pos3, 0);
-
-  checkBinaryThreshold(Pos4);
-  line(0, 0, cos(radians(225))*Pos4, sin(radians(225))*Pos4);
-
-  checkBinaryThreshold(Pos5);
-  line(0, 0, 0, -Pos5);
-
-  checkBinaryThreshold(Pos6);
-  line(0, 0, cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-
-  checkBinaryThreshold(Pos7);
-  line(0, 0, Pos7, 0);
-
-  checkBinaryThreshold(Pos8);
-  line(0, 0, cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-
-  stroke(200);
+  for (int i =0; i<8; i++) {
+    Dots.get(i).setPos(inputs[i]);
+    Dots.get(i).checkBinaryThreshold();
+    Dots.get(i).displayState();
+    line(0, 0, Dots.get(i).getPos().x, Dots.get(i).getPos().y);
+  }
+  displayBinaryStates();
+  stroke(0);
   strokeWeight(1);
 }
 
-void checkBinaryThreshold(float input) {
-  if (input<300) {
-    stroke(0);
-    strokeWeight(8);
-  } else {
-    stroke(200);
-    strokeWeight(1);
+void displayBinaryStates() {
+  String [] states = new String [8];
+  String [] IDs = new String [8];
+  for (int i =0; i<8; i++) {
+    //binaryStates=replaceCharAt(binaryStates, i, char(Dots.get(i).state));
+    states[i]=  str(Dots.get(i).state);
+    IDs[i]=str(Dots.get(i).name);
   }
+  String binaryStates= join(states, " ");
+  String binaryStatesRaw=join(states, "");
+  String dotIDs= join(IDs, " ");
+
+  //println(unbinary(binaryStatesRaw));
+  fill(255);
+  textSize(90);
+  text(unbinary(binaryStatesRaw), 70, 400);
+  textSize(25);
+  text(binaryStates, 300, 350);
+  fill(255, 50);
+  text(dotIDs, 300, 400);
+}
+//https://forum.processing.org/one/topic/replacing-a-single-specific-character-in-a-string.html
+String replaceCharAt(String s, int pos, char c) {
+  StringBuilder sb = new StringBuilder(s); //or StringBuffer
+  sb.setCharAt(pos, c);
+  return sb.toString();
 }
 void flowerMode() {
 
@@ -399,40 +414,17 @@ void flowerMode() {
 
   beginShape();
   stroke(filler, alpha);
+  int next;
+  for (int i =0; i<8; i++) {
+    if (i==7) {
+      next=0;
+    } else next=i+1;
 
-  Dots.get(0).setPos(0, Pos1);
-  vertex(0, Pos1);
-  vertexFiller(135, Pos1, Pos2, 1);
-
-  Dots.get(1).setPos(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-  vertex(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-  vertexFiller(180, Pos2, Pos3, 1);
-
-  Dots.get(2).setPos(-Pos3, 0);
-  vertex(-Pos3, 0);
-  vertexFiller(225, Pos3, Pos4, 1);
-
-  Dots.get(3).setPos(cos(radians(225))*Pos4, sin(radians(225))*Pos4);
-  vertex(cos(radians(225))*Pos4, sin(radians(225))*Pos4);  
-  vertexFiller(270, Pos4, Pos5, 1);
-
-  Dots.get(4).setPos(0, -Pos5);
-  vertex(0, -Pos5);
-  vertexFiller(315, Pos5, Pos6, 1);
-
-  Dots.get(5).setPos(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-  vertex(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-  vertexFiller(360, Pos6, Pos7, 1);
-
-  Dots.get(6).setPos(Pos7, 0);
-  vertex(Pos7, 0);
-  vertexFiller(45, Pos7, Pos8, 1);
-
-
-  Dots.get(7).setPos(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-  vertex(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-  vertexFiller(90, Pos8, Pos1, 1);
-
+    //println(inputs[i]);
+    Dots.get(i).setPos(inputs[i]);
+    vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
+    vertexFiller(offsetAngles[i], inputs[i], inputs[next], 1);
+  }
   vertex(0, Pos1);
 
   endShape();
@@ -444,38 +436,18 @@ void radarMode() {
   beginShape();
   stroke(filler, alpha);
 
-  Dots.get(0).setPos(0, Pos1);
-  vertex(0, Pos1);
-  vertexFiller(135, Pos1, Pos2, 2);
+  int next;
+  for (int i =0; i<8; i++) {
+    if (i==7) {
+      next=0;
+    } else next=i+1;
 
-  Dots.get(1).setPos(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-  vertex(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-  vertexFiller(180, Pos2, Pos3, 2);
+    //println(inputs[i]);
+    Dots.get(i).setPos(inputs[i]);
+    vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
+    vertexFiller(offsetAngles[i], inputs[i], inputs[next], 2);
+  }
 
-  Dots.get(2).setPos(-Pos3, 0);
-  vertex(-Pos3, 0);
-  vertexFiller(225, Pos3, Pos4, 2);
-
-  Dots.get(3).setPos(cos(radians(225))*Pos4, sin(radians(225))*Pos4);
-  vertex(cos(radians(225))*Pos4, sin(radians(225))*Pos4);  
-  vertexFiller(270, Pos4, Pos5, 2);
-
-  Dots.get(4).setPos(0, -Pos5);
-  vertex(0, -Pos5);
-  vertexFiller(315, Pos5, Pos6, 2);
-
-  Dots.get(5).setPos(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-  vertex(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-  vertexFiller(360, Pos6, Pos7, 2);
-
-  Dots.get(6).setPos(Pos7, 0);
-  vertex(Pos7, 0);
-  vertexFiller(45, Pos7, Pos8, 2);
-
-
-  Dots.get(7).setPos(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-  vertex(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-  vertexFiller(90, Pos8, Pos1, 2);
 
   vertex(0, Pos1);
 
@@ -488,29 +460,12 @@ void sharpMode() {
   beginShape();
   stroke(filler, alpha);
 
-  Dots.get(0).setPos(0, Pos1);
-  vertex(0, Pos1);
+  for (int i =0; i<8; i++) {
+    //println(inputs[i]);
+    Dots.get(i).setPos(inputs[i]);
+    vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
+  }
 
-  Dots.get(1).setPos(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-  vertex(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-
-  Dots.get(2).setPos(-Pos3, 0);
-  vertex(-Pos3, 0);
-
-  Dots.get(3).setPos(cos(radians(225))*Pos4, sin(radians(225))*Pos4);
-  vertex(cos(radians(225))*Pos4, sin(radians(225))*Pos4);  
-
-  Dots.get(4).setPos(0, -Pos5);
-  vertex(0, -Pos5);
-
-  Dots.get(5).setPos(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-  vertex(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-
-  Dots.get(6).setPos(Pos7, 0);
-  vertex(Pos7, 0);
-
-  Dots.get(7).setPos(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-  vertex(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
 
   vertex(0, Pos1);
 
@@ -523,31 +478,16 @@ void curvedMode() {
   beginShape();
   stroke(filler, alpha);
 
-  Dots.get(0).setPos(0, Pos1);
-  curveVertex(0, Pos1);
-  curveVertex(0, Pos1);
+  curveVertex(Dots.get(0).getPos().x, Dots.get(0).getPos().y);
 
-  Dots.get(1).setPos(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
-  curveVertex(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
+  for (int i =0; i<8; i++) {
 
-  Dots.get(2).setPos(-Pos3, 0);
-  curveVertex(-Pos3, 0);
+    //println(inputs[i]);
+    Dots.get(i).setPos(inputs[i]);
+    curveVertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
+  }
 
-  Dots.get(3).setPos(cos(radians(225))*Pos4, sin(radians(225))*Pos4);
-  curveVertex(cos(radians(225))*Pos4, sin(radians(225))*Pos4);  
-
-  Dots.get(4).setPos(0, -Pos5);
-  curveVertex(0, -Pos5);
-
-  Dots.get(5).setPos(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-  curveVertex(cos(radians(315))*Pos6, sin(radians(315))*Pos6);
-
-  Dots.get(6).setPos(Pos7, 0);
-  curveVertex(Pos7, 0);
-
-  Dots.get(7).setPos(cos(radians(45))*Pos8, sin(radians(45))*Pos8);
-  curveVertex(cos(radians(45))*Pos8, sin(radians(45))*Pos8); 
-  curveVertex(cos(radians(45))*Pos8, sin(radians(45))*Pos8); 
+  curveVertex(Dots.get(7).getPos().x, Dots.get(7).getPos().y); 
 
   endShape();
 
@@ -556,10 +496,10 @@ void curvedMode() {
   //on the first one
   beginShape();
 
-  curveVertex(Pos7, 0);
-  curveVertex(cos(radians(45))*Pos8, sin(radians(45))*Pos8); 
-  curveVertex(0, Pos1);
-  curveVertex(cos(radians(135))*Pos2, sin(radians(135))*Pos2);
+  curveVertex(Dots.get(6).getPos().x, Dots.get(6).getPos().y);
+  curveVertex(Dots.get(7).getPos().x, Dots.get(7).getPos().y); 
+  curveVertex(Dots.get(0).getPos().x, Dots.get(0).getPos().y);
+  curveVertex(Dots.get(1).getPos().x, Dots.get(1).getPos().y);
 
   endShape();
 }
@@ -643,11 +583,21 @@ void simulateData() {
   Pos8=map(noise(init8+simulateStep), 0, 1, 0, 500);
   //println(Pos1);
   simulateStep+=0.012;
+
+  inputs[0]=Pos1;
+  inputs[1]=Pos2;
+  inputs[2]=Pos3;
+  inputs[3]=Pos4;
+  inputs[4]=Pos5;
+  inputs[5]=Pos6;
+  inputs[6]=Pos7;
+  inputs[7]=Pos8;
+  //inputs =[Pos1, Pos2, Pos3, Pos4, Pos5, Pos6, Pos7, Pos8];
 }
 
 //The following function extrapolates the curve betwen two sensor rays and 
 //enables us to create curved edges usually beyond what curveVertex() can offer
-void vertexFiller(float degree, float ray1, float ray2, int mode) {
+void vertexFiller(int degree, float ray1, float ray2, int mode) {
   float value;
   float step;
   float divisions; // determines the amount of times we want to divide an arc
@@ -701,6 +651,15 @@ void serialEvent(Serial p) {
         Pos6 = map(float(items[11]), 0, maxSensorValue, 0, thresh);
         Pos7 = map(float(items[13]), 0, maxSensorValue, 0, thresh);
         Pos8 = map(float(items[15]), 0, maxSensorValue, 0, thresh);
+
+        inputs[0]=Pos1;
+        inputs[1]=Pos2;
+        inputs[2]=Pos3;
+        inputs[3]=Pos4;
+        inputs[4]=Pos5;
+        inputs[5]=Pos6;
+        inputs[6]=Pos7;
+        inputs[7]=Pos8;
       }
     }
   }
