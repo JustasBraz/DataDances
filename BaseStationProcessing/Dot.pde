@@ -4,14 +4,15 @@
 //The creation of this class was deemed necessary, as it was the easiest 
 //way to determine if e.g. the sensor values were matching some shape on screen
 class Dot { 
-  
+
   float xpos, ypos; 
   int name;
   int ellipseSize=10;
   float threshold=70;
   color filler=color(0, 76, 153);
   int alpha=100;
-  
+  float intensity;
+ int state =0;
   Dot (float x, float y, int i) {  
     ypos = y; 
     xpos = x;
@@ -30,7 +31,20 @@ class Dot {
     ypos = y; 
     xpos = x;
   }
-  
+  void setIntensity(float input) {
+   intensity=input;
+  }
+
+//  void displayBinaryText() {
+//    fill(255);
+//    textSize(25);
+//    if (intensity>300) {
+//      text(1, x+20, y+20);
+//    } else {
+//      //text(0, x, y);
+//    }
+//  }
+
   void display() {
     stroke(filler, alpha);
     fill(0, 102, 153, 51);

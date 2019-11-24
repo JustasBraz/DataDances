@@ -55,7 +55,7 @@ void setup()
   //constant handshaking with the Arduino
   frameRate(40);
 
-  size (1000, 1000);
+  size (1000, 900);
   //fullScreen();
 
   printArray(Serial.list());//displays all available ports; quite useful for debugging.
@@ -93,7 +93,7 @@ void draw()
   if (SIMULATION) {
     simulateData();
   } else {
-   maintainConnections();
+    maintainConnections();
   }
   //and uncomment the following line:
 
@@ -122,6 +122,7 @@ void draw()
   case 4:
     ac.stop();
     binaryMode();
+    GUI("inverse");
     break;
   case 5:
     ac.start();
@@ -150,7 +151,7 @@ void draw()
   }
 
   processKeys();
-  GUI();
+  GUI("Regular");
 
   if (RECORDING) {
     record();
@@ -167,7 +168,7 @@ void drawDots() {
   }
 }
 void maintainConnections() {
- Port_1.write('0');
+  Port_1.write('0');
 }
 //draws an ellipse on screen and makes the screen flash if all ent points
 //are withing the perimeter of the ellipse
@@ -184,10 +185,10 @@ void matchingShape() {
   drawEllipse();
   fill(0, 102, 153, 10);
 }
-void record(){
-if (frameCount%29==0) {
-      saveFrame(session+frameCount+".jpg");
-    }
+void record() {
+  if (frameCount%29==0) {
+    saveFrame(session+frameCount+".jpg");
+  }
 }
 void initGUI() {
   int spacing=10;
@@ -196,12 +197,11 @@ void initGUI() {
     spacing+=20;
   }
 }
-
-void GUI() {
+void GUI(String colorMode) {
   textSize(18);
   for (Button b : Buttons ) {
 
-    if (b.activate()&&mousePressed) {
+    if (b.activate(colorMode)&&mousePressed) {
       mode=b.getMode();
       visualAid=b.getMode();
     }
@@ -353,46 +353,104 @@ void checkOctaveThreshold(float input, int sensor) {
 }
 
 void binaryMode() {
+  background(0);
   stroke(160);
   strokeWeight(1);
 
-  checkBinaryThreshold(Pos1);
+  Pos1=checkBinaryThreshold(Pos1);
   line(0, 0, 0, Pos1);
+  displayBinaryText(Pos1, 0);
 
-  checkBinaryThreshold(Pos2);
+  Pos2=checkBinaryThreshold(Pos2);
   line(0, 0, cos(radians(135))*Pos2, sin(radians(135))*Pos2);
+  displayBinaryText(Pos2, 1);
 
-  checkBinaryThreshold(Pos3);
+  Pos3=checkBinaryThreshold(Pos3);
   line(0, 0, -Pos3, 0);
+  displayBinaryText(Pos3, 2);
 
-  checkBinaryThreshold(Pos4);
+  Pos4=checkBinaryThreshold(Pos4);
   line(0, 0, cos(radians(225))*Pos4, sin(radians(225))*Pos4);
+  displayBinaryText(Pos4, 3);
 
-  checkBinaryThreshold(Pos5);
+  Pos5=checkBinaryThreshold(Pos5);
   line(0, 0, 0, -Pos5);
+  displayBinaryText(Pos5, 4);
 
-  checkBinaryThreshold(Pos6);
+  Pos6=checkBinaryThreshold(Pos6);
   line(0, 0, cos(radians(315))*Pos6, sin(radians(315))*Pos6);
+  displayBinaryText(Pos6, 5);
 
-  checkBinaryThreshold(Pos7);
+  Pos7=checkBinaryThreshold(Pos7);
   line(0, 0, Pos7, 0);
+  displayBinaryText(Pos7, 6);
 
-  checkBinaryThreshold(Pos8);
+  Pos8=checkBinaryThreshold(Pos8);
   line(0, 0, cos(radians(45))*Pos8, sin(radians(45))*Pos8);
+  displayBinaryText(Pos8, 7);
 
   stroke(200);
   strokeWeight(1);
+  displayBinaryStates();
 }
 
-void checkBinaryThreshold(float input) {
-  if (input<300) {
-    stroke(0);
-    strokeWeight(8);
+
+void displayBinaryText(float pos, int id) {
+  float initPos=pos;
+  pos=pos+30;
+
+  float [][] coords={{0, pos}, {cos(radians(135))*pos, sin(radians(135))*pos}, 
+    {-pos, 0}, {cos(radians(225))*pos, sin(radians(225))*pos}, {0, -pos}, {cos(radians(315))*pos, sin(radians(315))*pos}, 
+    {pos, 0}, {cos(radians(45))*pos, sin(radians(45))*pos}};
+  fill(255);
+  textSize(25);
+  if (initPos>=310) {
+    text(1, coords[id][0], coords[id][1]);
+    Dots.get(id).state=1;
   } else {
-    stroke(200);
-    strokeWeight(1);
+    text(0, coords[id][0], coords[id][1]);
+    Dots.get(id).state=0;
   }
 }
+void displayBinaryStates() {
+  String [] states = new String [8];
+  String [] IDs = new String [8];
+  for (int i =0; i<8; i++) {
+    //binaryStates=replaceCharAt(binaryStates, i, char(Dots.get(i).state));
+    states[i]=  str(Dots.get(i).state);
+    IDs[i]=str(Dots.get(i).name+1);
+  }
+  String binaryStates= join(states, " ");
+  String binaryStatesRaw=join(states, "");
+  String dotIDs= join(IDs, " ");
+
+  //println(unbinary(binaryStatesRaw));
+  fill(255);
+  textSize(90);
+  text(unbinary(binaryStatesRaw), 70, 400);
+  textSize(25);
+  text(binaryStates, 300, 350);
+  fill(255, 50);
+  text(dotIDs, 300, 400);
+}
+//https://forum.processing.org/one/topic/replacing-a-single-specific-character-in-a-string.html
+String replaceCharAt(String s, int pos, char c) {
+  StringBuilder sb = new StringBuilder(s); //or StringBuffer
+  sb.setCharAt(pos, c);
+  return sb.toString();
+}
+float checkBinaryThreshold(float input) {
+  if (input<300) {
+    stroke(255);
+    strokeWeight(8);
+    return 310;
+  } else {
+    stroke(0);
+    strokeWeight(0);
+    return 309;
+  }
+}
+
 void flowerMode() {
 
   fill(0, 0, 150);
