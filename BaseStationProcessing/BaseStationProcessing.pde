@@ -263,10 +263,8 @@ void curvyLine(float xStart, float yStart, float xFin, float yFin, float step) {
 
   if (swing) {
     for (int i =0; i<lerps.length; i++) {
-
       vertex(lerps[i].x+random(-5, 5)*2, lerps[i].y+cos(random(-5, 5))*2);
     }
-
     vertex(fin.x, fin.y);
   } else {
     vertex(xFin, yFin);
@@ -369,7 +367,6 @@ void checkOctaveThreshold(float input, int sensor) {
 
 void binaryMode() {
 
-
   for (int i =0; i<8; i++) {
     Dots.get(i).setPos(inputs[i]);
     Dots.get(i).checkBinaryThreshold();
@@ -402,12 +399,14 @@ void displayBinaryStates() {
   fill(255, 50);
   text(dotIDs, 300, 400);
 }
+
 //https://forum.processing.org/one/topic/replacing-a-single-specific-character-in-a-string.html
 String replaceCharAt(String s, int pos, char c) {
   StringBuilder sb = new StringBuilder(s); //or StringBuffer
   sb.setCharAt(pos, c);
   return sb.toString();
 }
+
 void flowerMode() {
 
   fill(0, 0, 150);
@@ -448,7 +447,6 @@ void radarMode() {
     vertexFiller(offsetAngles[i], inputs[i], inputs[next], 2);
   }
 
-
   vertex(0, Pos1);
 
   endShape();
@@ -466,7 +464,6 @@ void sharpMode() {
     vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
   }
 
-
   vertex(0, Pos1);
 
   endShape();
@@ -477,7 +474,7 @@ void curvedMode() {
 
   beginShape();
   stroke(filler, alpha);
-
+  //first and last vertices get called two times to open and close the shape
   curveVertex(Dots.get(0).getPos().x, Dots.get(0).getPos().y);
 
   for (int i =0; i<8; i++) {
@@ -487,6 +484,7 @@ void curvedMode() {
     curveVertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
   }
 
+  //first and last vertices get called two times to open and close the shape
   curveVertex(Dots.get(7).getPos().x, Dots.get(7).getPos().y); 
 
   endShape();
@@ -534,45 +532,23 @@ void processKeys() {
 
   //changes the mode of display
   if (keyPressed) {    
-    switch(key) {
 
-    case '0':
-      mode =0;
-      visualAid=-1;
-      break;
-    case '1':
-      mode =1;
-      visualAid=-1;
-      break;
-    case '2':
-      mode =2;
-      visualAid=-1;
-      break;
-    case '3':
-      mode =3;
-      visualAid=-1;
-      break;
-    case '4':
-      mode =4;
-      visualAid=-1;
-      break;
-    case '5':
-      mode=5;
-      visualAid=-1;
-      break;
-    case '6':
-      visualAid=6;
-      break;
-    case '7':
-      visualAid=7;
-      break;
-    default:
-      break;
+    for (int i=0; i<8; i++) {
+      if (key==char(i)) {
+        if (i==7 ||i==8) {
+          mode=i;
+          break;
+        }
+
+        mode=i;
+        visualAid=-1;
+      }
     }
   }
 }
 
 void simulateData() {
+  //  TODO: clean up this mess
   Pos1=map(noise(init1+simulateStep), 0, 1, 0, 500);
   Pos2=map(noise(init2+simulateStep), 0, 1, 0, 500);
   Pos3=map(noise(init3+simulateStep), 0, 1, 0, 500);
@@ -642,7 +618,7 @@ void serialEvent(Serial p) {
         int thresh=500;
 
         int maxSensorValue=3500;//has to be tested empircally
-
+        //  TODO: clean up this mess
         Pos1 = map(float(items[1]), 0, maxSensorValue, 0, thresh);
         Pos2 = map(float(items[3]), 0, maxSensorValue, 0, thresh);
         Pos3 = map(float(items[5]), 0, maxSensorValue, 0, thresh);
