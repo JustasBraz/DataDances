@@ -60,7 +60,7 @@ void setup() {
   //otherwise, to conduct tests in simulated mode, set SIMULATION to true
 
   if (!SIMULATION) {
-    attemptConnection("COM5", 9600);
+    attemptConnection("COM4", 9600);
   } else {
     for (int i = 0; i < 8; i++) {
       sim_init[i] = random(0, 20000);
