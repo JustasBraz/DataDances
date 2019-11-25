@@ -34,6 +34,7 @@ class Dot {
       return false;
     }
   }
+  
   PVector getPos() {
     return new PVector(endCoord.x*intensity, endCoord.y*intensity);
   }
@@ -41,7 +42,6 @@ class Dot {
   void setPos(float input) {
     intensity=input;
   }
-
 
   void checkBinaryThreshold() {
     if (state == 0 && intensity < ROOM_SIZE * 0.9) {

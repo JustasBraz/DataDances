@@ -25,14 +25,7 @@ ArrayList<Dot> Dots;
 ArrayList<Button> Buttons;
 
 //Declaring values for simulation mode
-float init1=random(0, 20000);
-float init2=random(0, 20000);
-float init3=random(0, 20000);
-float init4=random(0, 20000);
-float init5=random(0, 20000);
-float init6=random(0, 20000);
-float init7=random(0, 20000);
-float init8=random(0, 20000);
+float [] sim_init = new float[8];
 
 float [] inputs =new float [8];//={Pos1, Pos2, Pos3, Pos4, Pos5, Pos6, Pos7, Pos8};
 int [] offsetAngles={135, 180, 225, 270, 315, 360, 45, 90};
@@ -70,6 +63,10 @@ void setup()
 
   if (!SIMULATION) {
     attemptConnection("COM5", 9600);
+  } else {
+    for (int i = 0; i < 8; i++) {
+      sim_init[i] = random(0, 20000);
+    }
   }
   //The folder to save screen-captured images
   session="test2/";
@@ -559,27 +556,10 @@ void processKeys() {
 }
 
 void simulateData() {
-  //  TODO: clean up this mess
-  Pos1=map(noise(init1+simulateStep), 0, 1, 0, 500);
-  Pos2=map(noise(init2+simulateStep), 0, 1, 0, 500);
-  Pos3=map(noise(init3+simulateStep), 0, 1, 0, 500);
-  Pos4=map(noise(init4+simulateStep), 0, 1, 0, 500);
-  Pos5=map(noise(init5+simulateStep), 0, 1, 0, 500);
-  Pos6=map(noise(init6+simulateStep), 0, 1, 0, 500);
-  Pos7=map(noise(init7+simulateStep), 0, 1, 0, 500);
-  Pos8=map(noise(init8+simulateStep), 0, 1, 0, 500);
-  //println(Pos1);
-  simulateStep+=0.012;
-
-  inputs[0]=Pos1;
-  inputs[1]=Pos2;
-  inputs[2]=Pos3;
-  inputs[3]=Pos4;
-  inputs[4]=Pos5;
-  inputs[5]=Pos6;
-  inputs[6]=Pos7;
-  inputs[7]=Pos8;
-  //inputs =[Pos1, Pos2, Pos3, Pos4, Pos5, Pos6, Pos7, Pos8];
+  for (int i = 0; i < 8; i++) {
+    inputs[i] = map(noise(sim_init[i]+simulateStep), 0, 1, 0, 500);
+  }
+  simulateStep += 0.012;
 }
 
 //The following function extrapolates the curve betwen two sensor rays and 
@@ -630,24 +610,9 @@ void serialEvent(Serial p) {
         int thresh=500;
 
         int maxSensorValue=3500;//has to be tested empircally
-        //  TODO: clean up this mess
-        Pos1 = map(float(items[1]), 0, maxSensorValue, 0, thresh);
-        Pos2 = map(float(items[3]), 0, maxSensorValue, 0, thresh);
-        Pos3 = map(float(items[5]), 0, maxSensorValue, 0, thresh);
-        Pos4 = map(float(items[7]), 0, maxSensorValue, 0, thresh);
-        Pos5 = map(float(items[9]), 0, maxSensorValue, 0, thresh);
-        Pos6 = map(float(items[11]), 0, maxSensorValue, 0, thresh);
-        Pos7 = map(float(items[13]), 0, maxSensorValue, 0, thresh);
-        Pos8 = map(float(items[15]), 0, maxSensorValue, 0, thresh);
-
-        inputs[0]=Pos1;
-        inputs[1]=Pos2;
-        inputs[2]=Pos3;
-        inputs[3]=Pos4;
-        inputs[4]=Pos5;
-        inputs[5]=Pos6;
-        inputs[6]=Pos7;
-        inputs[7]=Pos8;
+        for (int i = 0; i < 8; i++) {
+          inputs[i] = map(float(items[2*i + 1]), 0, maxSensorValue, 0, thresh);
+        }
       }
     }
   }
