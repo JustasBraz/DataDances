@@ -43,7 +43,7 @@ class Button {
     } else {
       fill(255, 50);
       text(mode, xpos - 7, ypos + 8);
-      fill(0, 5);
+      fill(255, 30);
     }
 
     ellipse(xpos, ypos, size, size);

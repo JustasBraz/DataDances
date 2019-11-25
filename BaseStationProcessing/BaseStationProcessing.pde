@@ -124,6 +124,12 @@ void draw() {
       GUI("inverse");
       break;
     case 5:
+      background(0);
+      ac.stop();
+      spellingMode();
+      GUI("inverse");
+      break;
+    case 6:
       ac.start();
       octaveMode();
       break;
@@ -138,10 +144,10 @@ void draw() {
   //one displays the end points of sensor values
   //and another initiates the matchingShape minigame
   switch (visualAid) {
-    case 6:
+    case 7:
       drawDots();
       break;
-    case 7:
+    case 8:
       matchingShape();
       break;
 
@@ -188,7 +194,7 @@ void record() {
 }
 void initGUI() {
   int spacing = 10;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 9; i++) {
     Buttons.add(new Button(-width / 2 + 50, -height / 2 + (i * 50 + 50) + spacing, i));
     spacing += 20;
   }
@@ -292,11 +298,89 @@ void binaryMode() {
   for (int i = 0; i < 8; i++) {
     Dots.get(i).setPos(inputs[i]);
     Dots.get(i).checkBinaryThreshold();
-    Dots.get(i).displayState();
+    Dots.get(i).displayState(0, 1);
     line(0, 0, Dots.get(i).getPos().x, Dots.get(i).getPos().y);
   }
   displayBinaryStates();
   stroke(0);
+  strokeWeight(1);
+}
+
+int spellingModeWordListLength = 10;
+
+String spellingModeWordList[] = {"light", "dog", "cat", "UCLIC", "scarf", "bird", "robin", "sparrow", "cup", "blue jay"};
+String spellingModeString = "light";
+String spellingModeResult = "lh___";
+int spellingModeCur = 2;
+long spellingModeDelay = 10 * 1000;
+long spellingModeNextTime = System.currentTimeMillis() + spellingModeDelay;
+
+void spellingMode() {
+  fill(255);
+  textSize(75);
+  if (!(spellingModeCur == spellingModeString.length())) {
+    char nextChar = spellingModeString.charAt(spellingModeCur);
+    text(binary(int(nextChar), 8), 50, -350);
+  } else {
+    text("Generating", 50, -350);
+  }
+  for (int i = 0; i < 8; i++) {
+    Dots.get(i).setPos(inputs[i]);
+    Dots.get(i).checkBinaryThreshold();
+    Dots.get(i).displayState(50, 0.8);
+    line(0, 50, Dots.get(i).getPos().x, Dots.get(i).getPos().y * 0.8 + 50);
+  }
+  char curChar = displayBinaryStates();
+  
+
+  
+  
+  int loc = -350;
+  for (int i = 0; i < spellingModeString.length(); i++) {
+    if (spellingModeResult.charAt(i) == '_') {
+      if (i == spellingModeCur) {
+        fill(map(System.currentTimeMillis() - spellingModeNextTime + spellingModeDelay, 0, spellingModeDelay, 100, 255));
+      } else {
+        fill(100);
+      }
+    } else if (spellingModeResult.charAt(i) == spellingModeString.charAt(i)) {
+      fill(0, 255, 0); 
+    } else {
+      fill(255, 0, 0);
+    }
+    textSize(75);
+    text(spellingModeString.charAt(i), loc, -350);
+    float middleLoc = loc += textWidth(spellingModeString.charAt(i)) / 2;
+    loc += textWidth(spellingModeString.charAt(i)) + 5;
+    
+    textSize(20);
+    fill(175);
+    middleLoc -= textWidth(i==spellingModeCur ? curChar : spellingModeResult.charAt(i)) / 2;
+    text(i==spellingModeCur ? curChar : spellingModeResult.charAt(i), middleLoc, -300);    
+  }
+
+  
+  if (System.currentTimeMillis() > spellingModeNextTime) {
+       if (spellingModeCur < spellingModeString.length()) {
+         spellingModeResult = replaceCharAt(spellingModeResult, spellingModeCur, curChar);
+         spellingModeCur += 1;
+       } else {
+         //New word
+         spellingModeString = spellingModeWordList[int(random(0, spellingModeWordListLength))];
+         StringBuilder sb = new StringBuilder();
+          for (int i = 0; i < spellingModeString.length(); i++) {
+            sb.append('_');
+          }
+          spellingModeResult = sb.toString();
+          spellingModeCur = 0;
+       }
+      
+      
+      spellingModeNextTime = System.currentTimeMillis() + (spellingModeCur == spellingModeString.length() ? spellingModeDelay * 2 : spellingModeDelay);
+      
+    }
+  
+  stroke(0);  
   strokeWeight(1);
 }
 
@@ -311,7 +395,7 @@ float rollingAverage(int id, float input, float count) {
   return avg;
 }
 
-void displayBinaryStates() {
+char displayBinaryStates() {
   String[] states = new String[8];
   String[] IDs = new String[8];
   for (int i = 0; i < 8; i++) {
@@ -327,10 +411,12 @@ void displayBinaryStates() {
   fill(255);
   textSize(90);
   text(unbinary(binaryStatesRaw), 70, 400);
+  text(char(unbinary(binaryStatesRaw)), -70-90, 400);
   textSize(25);
   text(binaryStates, 300, 350);
   fill(255, 50);
   text(dotIDs, 300, 400);
+  return (char(unbinary(binaryStatesRaw)));
 }
 
 //https://forum.processing.org/one/topic/replacing-a-single-specific-character-in-a-string.html

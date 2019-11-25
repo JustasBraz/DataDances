@@ -15,7 +15,7 @@ class Dot {
   int state = 0;
   float intensity;
 
-  final float ROOM_SIZE = 150.0; //SET TO 300 OUTSIDE UCLIC
+  final float ROOM_SIZE = 200.0; //SET TO 300 OUTSIDE UCLIC
 
   Dot(PVector a, int i) {
     startCoord.x = 0;
@@ -62,10 +62,10 @@ class Dot {
     }
   }
 
-  void displayState() {
+  void displayState(float yoffset, float yscale) {
     textSize(25);
     fill(255);
-    text(state, endCoord.x * 350, endCoord.y * 350);
+    text(state, endCoord.x * 350  - textWidth('0') / 2, endCoord.y * yscale * 350 + yoffset + textAscent() / 2);
   }
 
   void display() {
