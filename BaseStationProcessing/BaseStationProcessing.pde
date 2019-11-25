@@ -58,8 +58,7 @@ void setup()
   printArray(Serial.list());//displays all available ports; quite useful for debugging.
 
   //IF USING THE ACTUAL BASE STATION, LEAVE UNCOMMENTED
-  //otherwise, to conduct tests in simulated mode, comment
-  //the following two lines out:  
+  //otherwise, to conduct tests in simulated mode, set SIMULATION to true
 
   if (!SIMULATION) {
     attemptConnection("COM5", 9600);
@@ -78,17 +77,10 @@ void setup()
 
   //Initiating the array that will keep the 8 sensor values and 
   //transform them into XY coordinates
-  //for (int i =0; i<8; i++) {
-  //  Dots.add(new Dot(0, 0, i));
-  Dots.add(new Dot (new PVector(0, 1), 1));
-  Dots.add(new Dot (new PVector(cos(radians(135)), sin(radians(135))), 2));
-  Dots.add(new Dot (new PVector(-1, 0), 3));
-  Dots.add(new Dot (new PVector(cos(radians(225)), sin(radians(225))), 4));
-  Dots.add(new Dot (new PVector(0, -1), 5));
-  Dots.add(new Dot (new PVector(cos(radians(315)), sin(radians(315))), 6));
-  Dots.add(new Dot (new PVector(1, 0), 7));
-  Dots.add(new Dot (new PVector(cos(radians(45)), sin(radians(45))), 8));
-  //}
+  for (int i = 1; i < 8; i++) {
+    Dots.add(new Dot (new PVector(cos(radians(45 + 45*i)), sin(radians(45 + 45*i))), i));
+  }
+  Dots.add(new Dot (new PVector(cos(radians(45)), sin(radians(45))), 8)); // Special Case
 
   println("Entering draw");
   delay(1000);
@@ -96,15 +88,11 @@ void setup()
 
 void draw()
 { 
-  //IF USING THE ACTUAL BASE STATION, LEAVE UNCOMMENTED
-  //otherwise, to conduct tests in simulated mode, comment
-  //the following line out: 
   if (SIMULATION) {
     simulateData();
   } else {
     maintainConnections();
   }
-  //and uncomment the following line:
 
   background(255);
   translate(width/2, height/2);
@@ -136,7 +124,6 @@ void draw()
     ac.stop();
     binaryMode();
     GUI("inverse");
-
     break;
   case 5:
     ac.start();
@@ -272,22 +259,11 @@ void curvyLine(float xStart, float yStart, float xFin, float yFin, float step) {
 void octaveMode() {
   stroke(160);
   strokeWeight(1);
-  checkOctaveThreshold(Pos1, 1);
-  curvyLine(0, 0, 0, Pos1, increment);
-  checkOctaveThreshold(Pos2, 2);
-  curvyLine(0, 0, cos(radians(135))*Pos2, sin(radians(135))*Pos2, increment);
-  checkOctaveThreshold(Pos3, 3);
-  curvyLine(0, 0, -Pos3, 0, increment);
-  checkOctaveThreshold(Pos4, 4);
-  curvyLine(0, 0, cos(radians(225))*Pos4, sin(radians(225))*Pos4, increment);
-  checkOctaveThreshold(Pos5, 5);
-  curvyLine(0, 0, 0, -Pos5, increment);
-  checkOctaveThreshold(Pos6, 6);
-  curvyLine(0, 0, cos(radians(315))*Pos6, sin(radians(315))*Pos6, increment);
-  checkOctaveThreshold(Pos7, 7);
-  curvyLine(0, 0, Pos7, 0, increment);
-  checkOctaveThreshold(Pos8, 8);
-  curvyLine(0, 0, cos(radians(45))*Pos8, sin(radians(45))*Pos8, increment);
+  
+  for (int i = 0; i < 8; i++) {
+    checkOctaveThreshold(inputs[i], i+1);
+    curvyLine(0, 0, cos(radians(90 + 45 * i))*inputs[i], sin(radians(90 + 45 * i))*inputs[i], increment);
+  }
   stroke(200);
   strokeWeight(1);
   increment+=0.1;
