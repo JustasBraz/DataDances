@@ -47,11 +47,11 @@ boolean swing;
 
 String session;
 
-boolean SIMULATION= true;
+boolean SIMULATION=false;
 boolean RECORDING=false;
 void setup()
 { 
-  keysDown = new HashSet<Character>();
+  keysDown = new HashSet<Character>(); //<>//
   Dots = new ArrayList<Dot>();
   Buttons = new ArrayList<Button>();
 
@@ -69,7 +69,7 @@ void setup()
   //the following two lines out:  
 
   if (!SIMULATION) {
-    attemptConnection("COM4", 9600);
+    attemptConnection("COM5", 9600);
   }
   //The folder to save screen-captured images
   session="test2/";
@@ -365,9 +365,10 @@ void checkOctaveThreshold(float input, int sensor) {
   }
 }
 
-void binaryMode() {
-
+void binaryMode() {  
   for (int i =0; i<8; i++) {
+    print(inputs[i]);
+    print("\t");
     Dots.get(i).setPos(inputs[i]);
     Dots.get(i).checkBinaryThreshold();
     Dots.get(i).displayState();
@@ -378,12 +379,22 @@ void binaryMode() {
   strokeWeight(1);
 }
 
+HashMap<Integer, Float> rollingAverageHash = new HashMap<Integer, Float>();
+
+float rollingAverage(int id, float input, float count) {
+  float avg = rollingAverageHash.getOrDefault(id, input);
+  avg -= avg / count;
+  avg += input / count;
+  rollingAverageHash.put(id, avg);
+  return avg;
+}
+
 void displayBinaryStates() {
   String [] states = new String [8];
   String [] IDs = new String [8];
   for (int i =0; i<8; i++) {
     //binaryStates=replaceCharAt(binaryStates, i, char(Dots.get(i).state));
-    states[i]=  str(Dots.get(i).state);
+    states[i]=str(Dots.get(i).state);
     IDs[i]=str(Dots.get(i).name);
   }
   String binaryStates= join(states, " ");
@@ -609,11 +620,12 @@ void serialEvent(Serial p) {
     String message = p.readStringUntil(13);// get message till line break (ASCII > 13)
 
     if (message != null) {
+      print(message);
       message = trim(message);
       String items[] = split(message, '\t');
 
       //checks that the message has sufficient data points
-      if (items.length>3) {
+      if (items.length>14) {
 
         int thresh=500;
 

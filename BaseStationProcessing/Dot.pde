@@ -14,6 +14,8 @@ class Dot {
   int alpha=100;
   int state=0;
   float intensity;
+  
+  final float ROOM_SIZE = 150.0; //SET TO 300 OUTSIDE UCLIC
 
   Dot (PVector a, int i) {  
     startCoord.x=0;
@@ -42,21 +44,27 @@ class Dot {
 
 
   void checkBinaryThreshold() {
-    if (intensity<300) {
+    if (state == 0 && intensity < ROOM_SIZE * 0.9) {
+      state = 1;
+    } else if (state == 1 && intensity > ROOM_SIZE * 1.1) {
+      state = 0;
+    }
+    
+    if (state == 1) {
       stroke(255);
       strokeWeight(8);
       fill(255);
       setPos(300);
-      state=1;
     } else {
       stroke(0);
       strokeWeight(1);
       noFill();
-      state=0;
     }
   }
+  
   void displayState() {
     textSize(25);
+    fill(255);
     text(state, endCoord.x*350, endCoord.y*350);
   }
  
