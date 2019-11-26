@@ -25,7 +25,9 @@ class Tile {
 
   void black() {
     col = color (0) ;
+    id=0;
   }
+
 
   void checkMouse() {
     if (mouseX > x & mouseX < x+w & mouseY > y & mouseY < y+w) {

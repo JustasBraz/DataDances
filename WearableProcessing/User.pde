@@ -184,8 +184,8 @@ class User {
       //checks if the length of the message is sufficient
       if (items.length>3) {
         //--- Roll,Pitch in degrees
-        yaw = float(items[1]);
-        pitch = float(items[2]);
+        pitch = float(items[1]);
+        yaw = float(items[2]);
         roll = float(items[3]);
         identification = items[0];
         //typecasted from string to float

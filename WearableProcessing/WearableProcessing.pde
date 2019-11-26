@@ -11,8 +11,6 @@ int No_Users=1;
 //A LIST OF CONNECTED PORTS ON THE PC (UNIQUE FOR EACH MACHINE)
 String [] verifiedPorts={"COM4"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
 
-
-
 User[] users;
 Serial [] myPorts;
 
@@ -23,7 +21,7 @@ int activeUsers=0;
 
 ArrayList<Button> Buttons;
 
-int mode=-1;
+int mode=6;
 int NO_BUTTONS=7;
 
 Tile [][] lowResgrid;
@@ -40,7 +38,7 @@ int rowsLowRes;
 
 void setup()
 { 
-  size (1000, 1000);
+  size (1400, 1000);
   colorMode(HSB, 360, 360, 360);
 
   //fullScreen();
@@ -70,7 +68,6 @@ void setup()
 
 void draw()
 { 
-  // mode =6;
   //TODO: simulation mode
   maintainConnections();
 
@@ -253,6 +250,18 @@ void cleanCanvas() {
   if (keyPressed) {
     if (key == ' ') {
       background(360);
+  
+    for(int i=0; i<rowsLowRes; i++){
+      for(int j=0; j<colsLowRes;j++){
+        lowResgrid[j][i].black();
+      }
+    }
+    
+    for(int i=0; i<rowsHighRes; i++){
+      for(int j=0; j<colsHighRes;j++){
+        highResgrid[j][i].black();
+      }
+    }
     }
   }
 }
