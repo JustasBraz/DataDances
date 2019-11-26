@@ -130,6 +130,8 @@ void loop()
           location = 0;
         }
 
+      } else {
+        Serial1.print(sensor->last_status);
       }
 
     }
