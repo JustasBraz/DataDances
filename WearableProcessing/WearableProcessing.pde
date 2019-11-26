@@ -7,9 +7,9 @@
 import processing.serial.*;
 
 //DECLARING THE NUMBER OF USERS
-int No_Users=1;
+int No_Users=2;
 //A LIST OF CONNECTED PORTS ON THE PC (UNIQUE FOR EACH MACHINE)
-String [] verifiedPorts={"COM4"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
+String [] verifiedPorts={"COM7", "COM8"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
 
 User[] users;
 Serial [] myPorts;
@@ -21,7 +21,7 @@ int activeUsers=0;
 
 ArrayList<Button> Buttons;
 
-int mode=6;
+int mode=2;
 int NO_BUTTONS=7;
 
 Tile [][] lowResgrid;
