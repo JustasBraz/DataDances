@@ -40,7 +40,7 @@ boolean swing;
 
 String session;
 
-boolean SIMULATION = true;
+boolean SIMULATION = false;
 boolean RECORDING = false;
 void setup() {
   keysDown = new HashSet < Character > ();
@@ -55,12 +55,21 @@ void setup() {
   //fullScreen();
 
   printArray(Serial.list()); //displays all available ports; quite useful for debugging.
-
   //IF USING THE ACTUAL BASE STATION, LEAVE UNCOMMENTED
   //otherwise, to conduct tests in simulated mode, set SIMULATION to true
 
   if (!SIMULATION) {
-    attemptConnection("COM5", 9600);
+      String port = scan(9600);
+      if (port == null) {
+        println("**************************************");
+        println("      FAILED TO FIND BASESTATION      ");
+        println("**************************************");
+        exit();
+      } else {
+        println("Found base station on " + port);
+        delay(1000);
+        attemptConnection(port, 9600);
+      }
   } else {
     for (int i = 0; i < 8; i++) {
       sim_init[i] = random(0, 20000);
@@ -83,6 +92,44 @@ void setup() {
 
   println("Entering draw");
   delay(1000);
+}
+
+String scan(int baud) {
+  printSerial = false;
+  ArrayList<String> allPorts = new ArrayList<String>(Arrays.asList(Serial.list()));
+  for (String port : allPorts) {
+    print("Scanning: " + port + ": ");
+    try {
+      lastMessage = null;
+      final Serial serial = new Serial(this, port, baud);
+      serial.bufferUntil(13);
+      Thread t = new Thread(new WriteThread(serial));
+      t.start();
+      
+      delay(1000);
+      t.interrupt();
+      String message = lastMessage;
+      serial.stop();
+      if (message != null) {
+        String items[] = split(message, '\t');
+        
+        if (items.length == 17) {
+          println("Base Station");
+          printSerial = true;
+          return port;
+        } else {
+           println("Found Unknwon DataDance of " + items.length); 
+        }
+      } else {
+        println("Unknown - " + message);
+      }
+    } catch (Exception e) {
+      println("Busy");
+    }
+    
+  }
+  printSerial = true;
+  return null;
 }
 
 void draw() {
@@ -209,6 +256,20 @@ void GUI(String colorMode) {
       visualAid = b.getMode();
     }
   }
+  if (colorMode.equals("Regular")) {
+    stroke(0, 0, 0);
+  } else {
+    stroke(255, 255, 255);
+  }
+  strokeWeight(5);
+  int startX = 450;
+  int startY = -450;
+  
+  line(startX, startY, startX, startY - 30);
+  line(startX, startY - 30, startX - 10, startY - 20);
+  line(startX, startY - 30, startX + 10, startY - 20);
+  line(startX - 10, startY, startX + 10, startY);
+  
 }
 
 //Initiates the sound library, copied from beads library example #3
@@ -602,20 +663,24 @@ void vertexFiller(int degree, float ray1, float ray2, int mode) {
   }
 }
 
+String lastMessage = "";
+boolean printSerial = true;
 
 //This function's name should not be modified, as the Serial library is very sensitive
 //about how it handles data, and serialEvent() is crucial.
 void serialEvent(Serial p) {
   try {
     String message = p.readStringUntil(13); // get message till line break (ASCII > 13)
-
+    lastMessage = message;
     if (message != null) {
-      print(message);
+      if (printSerial) {
+        println(message);
+      }
       message = trim(message);
       String items[] = split(message, '\t');
 
       //checks that the message has sufficient data points
-      if (items.length > 14) {
+      if (items.length > 15) {
 
         int thresh = 500;
 
@@ -629,4 +694,8 @@ void serialEvent(Serial p) {
     println("Error parsing:");
     e.printStackTrace();
   }
+}
+
+void stop() {
+  Port_1.stop();
 }
