@@ -40,7 +40,7 @@ boolean swing;
 
 String session;
 
-boolean SIMULATION = false;
+boolean SIMULATION = true;
 boolean RECORDING = false;
 void setup() {
   keysDown = new HashSet < Character > ();
@@ -164,19 +164,43 @@ void draw() {
       ac.stop();
       curvedMode();
       break;
-    case 4:
+    case 4: // Just the lines
       background(0);
       ac.stop();
-      binaryMode();
+      binaryMode(false, false, false);
       GUI("inverse");
       break;
-    case 5:
+    case 5: // Lines with 8 bit binary
+      background(0);
+      ac.stop();
+      binaryMode(true, false, false);
+      GUI("inverse");
+      break;
+    case 6: // Lines with 8 bit binary + denary
+      background(0);
+      ac.stop();
+      binaryMode(true, true, false);
+      GUI("inverse");
+      break;
+    case 7: // Lines with 8 bit binary + ascii
+      background(0);
+      ac.stop();
+      binaryMode(true, false, true);
+      GUI("inverse");
+      break;
+    case 8: // Lines with 8 bit binary + ascii + denary
+      background(0);
+      ac.stop();
+      binaryMode(true, true, true);
+      GUI("inverse");
+      break;
+    case 9:
       background(0);
       ac.stop();
       spellingMode();
       GUI("inverse");
       break;
-    case 6:
+    case 10:
       ac.start();
       octaveMode();
       break;
@@ -191,10 +215,10 @@ void draw() {
   //one displays the end points of sensor values
   //and another initiates the matchingShape minigame
   switch (visualAid) {
-    case 7:
+    case 11:
       drawDots();
       break;
-    case 8:
+    case 12:
       matchingShape();
       break;
 
@@ -241,7 +265,7 @@ void record() {
 }
 void initGUI() {
   int spacing = 10;
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < 11; i++) {
     Buttons.add(new Button(-width / 2 + 50, -height / 2 + (i * 50 + 50) + spacing, i));
     spacing += 20;
   }
@@ -355,14 +379,16 @@ void checkOctaveThreshold(float input, int sensor) {
   }
 }
 
-void binaryMode() {
+void binaryMode(boolean binaryMode, boolean denaryMode, boolean asciiMode) {
   for (int i = 0; i < 8; i++) {
     Dots.get(i).setPos(inputs[i]);
     Dots.get(i).checkBinaryThreshold();
     Dots.get(i).displayState(0, 1);
     line(0, 0, Dots.get(i).getPos().x, Dots.get(i).getPos().y);
   }
-  displayBinaryStates();
+  if (denaryMode || asciiMode || binaryMode) {
+    displayBinaryStates(binaryMode, denaryMode, asciiMode);
+  }
   stroke(0);
   strokeWeight(1);
 }
@@ -391,7 +417,7 @@ void spellingMode() {
     Dots.get(i).displayState(50, 0.8);
     line(0, 50, Dots.get(i).getPos().x, Dots.get(i).getPos().y * 0.8 + 50);
   }
-  char curChar = displayBinaryStates();
+  char curChar = displayBinaryStates(true, true, true);
   
 
   
@@ -456,7 +482,9 @@ float rollingAverage(int id, float input, float count) {
   return avg;
 }
 
-char displayBinaryStates() {
+char displayBinaryStates(boolean binaryMode, boolean denaryMode, boolean asciiMode) {
+  boolean greyTextBinary = false;
+  
   String[] states = new String[8];
   String[] IDs = new String[8];
   for (int i = 0; i < 8; i++) {
@@ -471,12 +499,23 @@ char displayBinaryStates() {
   //println(unbinary(binaryStatesRaw));
   fill(255);
   textSize(90);
-  text(unbinary(binaryStatesRaw), 70, 400);
-  text(char(unbinary(binaryStatesRaw)), -70-90, 400);
+  if (denaryMode) {
+    text(unbinary(binaryStatesRaw), 70, 400);
+  }
+  if (asciiMode) {
+    text(char(unbinary(binaryStatesRaw)), -70-90, 400);
+  }
+  
   textSize(25);
-  text(binaryStates, 300, 350);
+  if (binaryMode) {
+    text(binaryStates, 300, 350);
+  }
+  
   fill(255, 50);
-  text(dotIDs, 300, 400);
+  if (greyTextBinary) {
+    text(dotIDs, 300, 400);
+  }
+ 
   return (char(unbinary(binaryStatesRaw)));
 }
 
@@ -613,7 +652,7 @@ void processKeys() {
   //changes the mode of display
   if (keyPressed) {
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 10; i++) {
       if (key == char(i)) {
         if (i == 7 || i == 8) {
           mode = i;

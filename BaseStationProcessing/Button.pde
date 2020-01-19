@@ -36,13 +36,19 @@ class Button {
   }
 
   void visualiseOff() {
+    strokeWeight(1);
+    if (inverseColors == 0) {
+      stroke(#C0C0C0);
+    } else {
+      stroke(#000000);
+    }
     if (inverseColors == 0) {
       fill(0, 50);
-      text(mode, xpos - 7, ypos + 8);
+      text(mode, xpos - String.valueOf(mode).length() * 5 - 2, ypos + 8);
       fill(230, 5);
     } else {
       fill(255, 50);
-      text(mode, xpos - 7, ypos + 8);
+      text(mode, xpos - String.valueOf(mode).length() * 5 - 2, ypos + 8);
       fill(255, 30);
     }
 
@@ -51,13 +57,20 @@ class Button {
   }
 
   void visualiseOn() {
+    strokeWeight(1);
+    if (inverseColors == 0) {
+      stroke(#C0C0C0);
+    } else {
+      stroke(#000000);
+    }
+      
     if (inverseColors == 0) {
       fill(0);
-      text(mode, xpos - 7, ypos + 8);
+      text(mode, xpos - String.valueOf(mode).length() * 5 - 2, ypos + 8);
       fill(255, 50, 50, 15);
     } else {
       fill(255);
-      text(mode, xpos - 7, ypos + 8);
+      text(mode, xpos - String.valueOf(mode).length() * 5 - 2, ypos + 8);
       fill(255, 50);
     }
 
