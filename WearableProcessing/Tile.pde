@@ -6,7 +6,6 @@ class Tile {
   int prevCol;
   int id=0;
   int lastReversed=millis();
-  int lastSwitch=millis();
   int clearAfter = 3000;
   float nudge;
   
