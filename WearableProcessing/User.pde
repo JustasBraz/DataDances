@@ -27,6 +27,10 @@ class User {
   //may have to be put in User(){} and made private
   float STEP_SIZE=0.05;
   float h=0;
+
+  int lastPressedHigh=0;
+  int lastPressedLow=0;
+
   User( int col, int alpha_val) { 
     initial_color = col;
     alpha=alpha_val;
@@ -224,15 +228,20 @@ class User {
 
 
   void displayTiles(String res) {
+
     if (res=="High") {
 
       for (int i=0; i<colsHighRes; i++) {
         for (int j=0; j<rowsHighRes; j++) {
           //show me them goodies
           highResgrid[i][j].display();
-          highResgrid[i][j].checkWearable(yaw*scale, pitch*scale);
+          highResgrid[i][j].checkWearable(yaw*scale, pitch*scale);//checkMouse() for simulation
 
           if (mousePressed) {
+            lastPressedHigh=millis();
+          }
+          if ((millis()-lastPressedHigh)<3000) {
+            println(millis()-lastPressedHigh);
             highResgrid[i][j].displayID();
           }
         }
@@ -247,6 +256,10 @@ class User {
           lowResgrid[i][j].checkWearable(yaw*scale, pitch*scale);
 
           if (mousePressed) {
+            lastPressedLow=millis();
+          }
+          if (abs(millis()-lastPressedLow)<3000) {
+            println(millis()-lastPressedLow);
             lowResgrid[i][j].displayID();
           }
         }
