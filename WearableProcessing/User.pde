@@ -1,9 +1,12 @@
+import java.util.Iterator;
+
 class User { 
   int initial_color;
   int alpha;
   float scale=200;
   //Most probable reason for multi agent radii bug :
   //the following has to be put in User() and made private.
+  int deleteAfter = 3000; //Delete stroke after x milliseconds
   float radius=30;
 
   float yaw, pitch, roll=0;
@@ -36,48 +39,102 @@ class User {
   }
 
   //visualises the data into circles on screen
-  void move(String pen) {
-    if (pen=="Point") {
-      stroke(initial_color, unique_color, radius, alpha);
-      strokeWeight(radius);//radius is dependent on movementt
-      findDelta(yaw*scale, pitch*scale) ;
-      point(yaw*scale, pitch*scale);
+  void move(String pen) {    
+    if (pen.equals("Point")) {
+      old_moves.add(new AgeObject(new StrokeObject(initial_color, unique_color, radius, alpha, radius, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
+      
     }
-    if (pen=="Line") {
-      stroke(initial_color, unique_color, radius);
-      strokeWeight(radius);//radius is dependent on movementt
-      findDelta(yaw*scale, pitch*scale) ;
-      line(py, pp, yaw*scale, pitch*scale);
-      //println(py, pp,yaw*scale, pitch*scale);
+    if (pen.equals("Line")) {
+      old_moves.add(new AgeObject(new StrokeObject(initial_color, unique_color, radius, 255, radius, py, pp, yaw*scale, pitch*scale)));    
       pp=pitch*scale;
       py=yaw*scale;
     }
+    findDelta(yaw*scale, pitch*scale) ;
+    
+    Iterator<AgeObject> oldMovesIterator = old_moves.iterator();
+      
+      while (oldMovesIterator.hasNext()) {
+        AgeObject obj = oldMovesIterator.next();
+        if (obj.age() > deleteAfter) {
+          oldMovesIterator.remove();
+        } else {
+          obj.stroke.draw(pen);
+        } 
+      }
   }
-
+  
+  ArrayList<AgeObject> old_moves = new ArrayList<AgeObject>();
+  
   //visualises the data into circles on screen
   void move(int RGB_bits, String pen) {
-    if (pen=="Point") {
-      stroke(getRainbow(RGB_bits), 360, 360, alpha);
-
-      strokeWeight(30);//radius is dependent on movementt
-      //findDelta(yaw*scale, pitch*scale) ;
-
-      point(yaw*scale, pitch*scale);
+    if (pen.equals("Point")) {
+      old_moves.add(new AgeObject(new StrokeObject(getRainbow(RGB_bits), 360, 360, alpha, 30, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
+      
     }
-    if (pen=="Line") {
-      stroke(getRainbow(RGB_bits), 360, 360);
-      strokeWeight(20);//radius is dependent on movementt
-      //findDelta(yaw*scale, pitch*scale) ;
-
-      line(py, pp, yaw*scale, pitch*scale);
-      //println(py, pp,yaw*scale, pitch*scale);
+    if (pen.equals("Line")) {
+      old_moves.add(new AgeObject(new StrokeObject(getRainbow(RGB_bits), 360, 360, 255, 20, py, pp, yaw*scale, pitch*scale)));    
       pp=pitch*scale;
       py=yaw*scale;
     }
+    Iterator<AgeObject> oldMovesIterator = old_moves.iterator();
+      
+      while (oldMovesIterator.hasNext()) {
+        AgeObject obj = oldMovesIterator.next();
+        if (obj.age() > deleteAfter) {
+          oldMovesIterator.remove();
+        } else {
+          obj.stroke.draw(pen);
+        } 
+      }
+  }
+  
+  class StrokeObject {
+    float v1, v2, v3, alpha, weight, py, px, y, x;
+    StrokeObject(float v1, float v2, float v3, float alpha, float weight, float px, float py, float x, float y) {
+      this.v1 = v1;
+      this.v2 = v2;
+      this.v3 = v3;
+      this.alpha = alpha;
+      this.weight = weight;
+      this.px = px;
+      this.py = py;
+      this.x = x;
+      this.y = y;
+    }
+    void draw(String pen) {
+      stroke(v1, v2, v3, alpha);
+      strokeWeight(weight);
+      if (pen.equals("Point")) {
+        point(px, py);
+      } else {
+        line(px, py, x, y);
+      }
+      
+    }
+  }
+  
+  class AgeObject {
+     int startTime;
+     StrokeObject stroke;
+     AgeObject(StrokeObject stroke) {
+       this.startTime = millis();
+       this.stroke = stroke;
+     }
+     AgeObject(int startTime, StrokeObject stroke) {
+       this.startTime = startTime;
+       this.stroke = stroke;
+     }
+     int age() {
+       return millis() - startTime;
+     }
+  }
+  
+  void clear() {
+    old_moves = new ArrayList<AgeObject>();
   }
 
 
-  int getRainbow(int bits) {
+  int getRealRainbow(int bits) {
     if (h > 360) {
       h = 0;
       println(true);
@@ -93,6 +150,76 @@ class User {
     float n = pow(2, bits);
 
     return int((step*360/n)%360);
+  }
+  
+  int stage = 0;
+  float prev[] = {255, 0, 0};
+  float triggerCounter = 0;
+  
+  int getRainbow(int bits) {
+    if (bits == 1) {
+      return getFake1();
+    }
+    if (bits == 2) {
+      return getFake2();
+    }
+    
+    double delta = 255 / Math.pow(2, bits);
+    
+    int order[] = {2, 1, 0, 1, 2, 1, 0, 1};
+    float change[] = {1, 1, -1, -1, -1, 1, 1, -1};
+    if (triggerCounter >= 255/delta / Math.pow(2, bits)) {
+      prev[order[stage]] += change[stage] * delta;
+      triggerCounter = 0;
+    } else {
+      triggerCounter += 1;
+    }
+    if (change[stage] == 1 && prev[order[stage]] >= 255) {
+      prev[order[stage]] = 255;
+      stage += 1;
+    }
+    else if (change[stage] == -1 && prev[order[stage]] <= 0) {
+      prev[order[stage]] = 0;
+      stage += 1;
+    }
+    if (stage == 8) {
+      stage = 0;
+    }
+    colorMode(RGB);
+    int hue = int(hue(color(prev[0], prev[1], prev[2])));
+    colorMode(HSB);
+    return hue;
+  }
+    
+  int fakeLoc = 0;
+  int getFake1() {
+    triggerCounter += 1;
+    if (triggerCounter > 64) {
+      triggerCounter = 0;
+      if (fakeLoc == 0) {
+        fakeLoc = 255;
+      } else {
+        fakeLoc = 0;
+      }
+    }
+    return fakeLoc;
+  }
+  
+  int getFake2() {
+    triggerCounter += 1;
+    if (triggerCounter > 32) {
+      triggerCounter = 0;
+      if (fakeLoc == 0) {
+        fakeLoc = 320;
+      } else if (fakeLoc == 320) {
+         fakeLoc = 270; 
+      } else if (fakeLoc == 270) {
+         fakeLoc = 220;
+      } else {
+        fakeLoc = 0;
+      }
+    }
+    return fakeLoc;
   }
 
 
@@ -179,7 +306,6 @@ class User {
   void putData(String data) {
     //check if data is non-empty string
     if (data != null) {
-      data = trim(data);
       String items[] = split(data, '\t');
       //checks if the length of the message is sufficient
       if (items.length>3) {

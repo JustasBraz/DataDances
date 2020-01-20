@@ -1,4 +1,4 @@
-//This code is used to visualise the Wearables on screen.
+//This code is used to visualise the Wearables on screen. //<>//
 //Here the processing serial library will be used with multiple serial connections open at once
 //Since this has caused issues in the past, more information can be found in the link below:
 
@@ -23,11 +23,12 @@ ArrayList<Button> Buttons;
 
 int mode=2;
 int NO_BUTTONS=7;
+float [][] init;
 
 Tile [][] lowResgrid;
 Tile [][] highResgrid;
 
-boolean SIMULATION= false;
+boolean SIMULATION= true;
 boolean RECORDING=false;
 String session="test11_19/RGB_4bits/";
 
@@ -54,6 +55,14 @@ void setup()
 
   if (!SIMULATION) {
     attemptConnection();
+  } else {
+    users=new User [No_Users];
+    dataIn = new String[No_Users];
+    init = new float[No_Users][3];
+    for (int i = 0; i < No_Users; i++) {
+      users[i]=new User(int(random(0, 255)), 50);
+      init[i] = new float[] {random(0, 20000), random(0, 20000), random(0, 20000)};
+    }
   }
 
   initGUI(NO_BUTTONS);
@@ -68,13 +77,19 @@ void setup()
 
 void draw()
 { 
+  clear();
+  background(360);
   //TODO: simulation mode
-  maintainConnections();
+  if (!SIMULATION) {
+    maintainConnections();
+  } else {
+    simulateData();
+  }
 
 
-  if(mode!=0 || mode!=1){
-  //create a fading background
-  fadingBackground();
+  if (mode!=0 || mode!=1) {
+    //create a fading background
+    fadingBackground();
   }
   //if space is pressed, clean the canvas
   cleanCanvas();
@@ -86,21 +101,21 @@ void draw()
     users[userID].putData(dataIn[userID]);
     //Then we visualise it by drawing circles
     //in the appropriate coordinates
-
+    
     switch(mode) {
 
     case 0:
       //LowRes
       translate(-width/2, -height/2);
-      background(0,0,360);
+      background(0, 0, 360);
       users[userID].displayTiles("Low");
       translate(width/2, height/2);
       GUI();
       break;
     case 1:
       //HighRes
-       translate(-width/2, -height/2);
-      background(0,0,360);
+      translate(-width/2, -height/2);
+      background(0, 0, 360);
       users[userID].displayTiles("High");
       translate(width/2, height/2);
       GUI();
@@ -112,7 +127,7 @@ void draw()
       break;
     case 3:
       //Rainbow2
-      translate(0,0);
+      translate(0, 0);
       users[userID].move(2, "Line");
       break;
     case 4:
@@ -250,19 +265,26 @@ void cleanCanvas() {
   if (keyPressed) {
     if (key == ' ') {
       background(360);
-  
-    for(int i=0; i<rowsLowRes; i++){
-      for(int j=0; j<colsLowRes;j++){
-        lowResgrid[j][i].black();
+      clearUsers();
+
+      for (int i=0; i<rowsLowRes; i++) {
+        for (int j=0; j<colsLowRes; j++) {
+          lowResgrid[j][i].black();
+        }
+      }
+
+      for (int i=0; i<rowsHighRes; i++) {
+        for (int j=0; j<colsHighRes; j++) {
+          highResgrid[j][i].black();
+        }
       }
     }
-    
-    for(int i=0; i<rowsHighRes; i++){
-      for(int j=0; j<colsHighRes;j++){
-        highResgrid[j][i].black();
-      }
-    }
-    }
+  }
+}
+
+void clearUsers() {
+  for (User user: users) {
+    user.clear();
   }
 }
 
@@ -282,6 +304,7 @@ void GUI() {
     if (b.activate()&&mousePressed) {
       mode=b.getMode();
       background(360);
+      clearUsers();
     }
   }
 }
@@ -297,4 +320,13 @@ void processKeys() {
       }
     }
   }
+}
+
+float simulateStep = 0;
+
+void simulateData() {
+  for (int i = 0; i < No_Users; i++) {
+    dataIn[i] = str(i) + "\t" + String.valueOf(map(noise(init[i][0]+simulateStep), 0, 1, 0, 6) - 3) + "\t" + String.valueOf(map(noise(init[i][1]+simulateStep), 0, 1, 0, 6) - 3) + "\t" + String.valueOf(map(noise(init[i][2]+simulateStep), 0, 1, 0, 6) - 3);
+  }
+  simulateStep+=0.012;
 }
