@@ -46,6 +46,10 @@ class Tile {
 
       println(x, y, abs((millis()-this.lastReversed)));
     }
+      if(id==1&&abs(millis()-lastReversed)>3000){
+       col=color(0);
+        id=0;
+    }
   }
   void checkWearable(float coordX, float coordY) {
     coordX+=width/2;
@@ -63,14 +67,16 @@ class Tile {
         id=1;
         lastReversed=millis();
       }
-
       //println(x, y, abs((millis()-this.lastReversed)));
     }
+    if(id==1&&abs(millis()-lastReversed)>3000){
+       col=color(0);
+        id=0;
+    }  
   }
 
   void displayID() {
     int off=5;
-
 
     fill(0);
     textSize(22);

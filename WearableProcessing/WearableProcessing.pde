@@ -7,9 +7,9 @@
 import processing.serial.*;
 
 //DECLARING THE NUMBER OF USERS
-int No_Users=2;
+int No_Users=1;
 //A LIST OF CONNECTED PORTS ON THE PC (UNIQUE FOR EACH MACHINE)
-String [] verifiedPorts={"COM7", "COM8"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
+String [] verifiedPorts={"COM4", "COM8"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
 
 User[] users;
 Serial [] myPorts;
@@ -38,7 +38,7 @@ int rowsLowRes;
 
 void setup()
 { 
-  size (1400, 1000);
+  size (700, 700);
   colorMode(HSB, 360, 360, 360);
 
   //fullScreen();
@@ -70,7 +70,7 @@ void draw()
 { 
   //TODO: simulation mode
   maintainConnections();
-
+  
 
   if(mode!=0 || mode!=1){
   //create a fading background
