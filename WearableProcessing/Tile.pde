@@ -7,14 +7,14 @@ class Tile {
   int id=0;
   int lastReversed=millis();
   float nudge;
-  
+
   Tile (float tempX, float tempY, float tempSide, int tempCol) {
     x = tempX;
     y = tempY;
     w = tempSide;
     col = tempCol;
   }
- 
+
   void display() {
     //stroke(360);
     rectMode(CENTER);
@@ -46,9 +46,9 @@ class Tile {
 
       println(x, y, abs((millis()-this.lastReversed)));
     }
-      if(id==1&&abs(millis()-lastReversed)>3000){
-       col=color(0);
-        id=0;
+    if (id==1&&abs(millis()-lastReversed)>3000) {
+      col=color(0);
+      id=0;
     }
   }
   void checkWearable(float coordX, float coordY) {
@@ -69,10 +69,10 @@ class Tile {
       }
       //println(x, y, abs((millis()-this.lastReversed)));
     }
-    if(id==1&&abs(millis()-lastReversed)>3000){
-       col=color(0);
-        id=0;
-    }  
+    if (id==1&&abs(millis()-lastReversed)>3000) {
+      col=color(0);
+      id=0;
+    }
   }
 
   void displayID() {
@@ -86,7 +86,7 @@ class Tile {
     } else {
       fill(0);
     }
-    fill(0, 360,360);
+    fill(0, 360, 360);
     text(id, x-off, y+off);
     noStroke();
   }

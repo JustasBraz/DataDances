@@ -543,7 +543,6 @@ void flowerMode() {
     vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
     vertexFiller(offsetAngles[i], inputs[i], inputs[next], 1);
   }
-  vertex(0, Pos1);
 
   endShape();
 }
@@ -566,8 +565,6 @@ void radarMode() {
     vertexFiller(offsetAngles[i], inputs[i], inputs[next], 2);
   }
 
-  vertex(0, Pos1);
-
   endShape();
 }
 void sharpMode() {
@@ -582,9 +579,6 @@ void sharpMode() {
     Dots.get(i).setPos(inputs[i]);
     vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
   }
-
-  vertex(0, Pos1);
-
   endShape();
 }
 void curvedMode() {
