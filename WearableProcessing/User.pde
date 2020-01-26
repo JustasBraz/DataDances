@@ -237,7 +237,7 @@ class User {
           highResgrid[i][j].display();
           highResgrid[i][j].checkWearable(yaw*scale, pitch*scale);//checkMouse() for simulation
 
-          if (mousePressed) {
+          if (mouseButton == RIGHT) {
             lastPressedHigh=millis();
           }
           if ((millis()-lastPressedHigh)<3000) {
@@ -255,7 +255,7 @@ class User {
           lowResgrid[i][j].display();
           lowResgrid[i][j].checkWearable(yaw*scale, pitch*scale);
 
-          if (mousePressed) {
+          if (mouseButton == RIGHT) {
             lastPressedLow=millis();
           }
           if (abs(millis()-lastPressedLow)<3000) {
