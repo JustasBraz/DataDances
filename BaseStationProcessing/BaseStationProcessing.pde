@@ -633,7 +633,7 @@ void rainbowMode() {
     stroke(360, 0, 360);
     polygon(0, 0, 80, 8);
     strokeWeight(10);
-    rainbowLine(int(cos(radians(45 + 45 * i - 1))*80), int(sin(radians(45 + 45 * i - 1))*80), int(Dots.get(i).getPos().x), int(Dots.get(i).getPos().y));
+    rainbowLine(int(cos(radians(45 + 45 * (i + 1)))*80), int(sin(radians(45 + 45 * (i + 1)))*80), int(Dots.get(i).getPos().x), int(Dots.get(i).getPos().y));
   }
   
   
