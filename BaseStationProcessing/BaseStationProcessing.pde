@@ -164,49 +164,57 @@ void draw() {
       ac.stop();
       curvedMode();
       break;
-    case 4: // Just the lines
+    case 4:
+      ac.stop();
+      background(0);
+      rainbowMode();
+      GUI("inverse");
+      break;
+    case 5: // Just the lines
       background(0);
       ac.stop();
       binaryMode(false, false, false);
       GUI("inverse");
       break;
-    case 5: // Lines with 8 bit binary
+    case 6: // Lines with 8 bit binary
       background(0);
       ac.stop();
       binaryMode(true, false, false);
       GUI("inverse");
       break;
-    case 6: // Lines with 8 bit binary + denary
+    case 7: // Lines with 8 bit binary + denary
       background(0);
       ac.stop();
       binaryMode(true, true, false);
       GUI("inverse");
       break;
-    case 7: // Lines with 8 bit binary + ascii
+    case 8: // Lines with 8 bit binary + ascii
       background(0);
       ac.stop();
       binaryMode(true, false, true);
       GUI("inverse");
       break;
-    case 8: // Lines with 8 bit binary + ascii + denary
+    case 9: // Lines with 8 bit binary + ascii + denary
       background(0);
       ac.stop();
       binaryMode(true, true, true);
       GUI("inverse");
       break;
-    case 9:
+    case 10:
       background(0);
       ac.stop();
       spellingMode();
       GUI("inverse");
       break;
-    case 10:
+    case 11:
       ac.start();
       octaveMode();
       break;
     default:
       ac.stop();
-      radarMode();
+      background(0);
+      rainbowMode();
+      GUI("inverse");
       break;
   }
 
@@ -265,7 +273,7 @@ void record() {
 }
 void initGUI() {
   int spacing = 10;
-  for (int i = 0; i < 11; i++) {
+  for (int i = 0; i < 12; i++) {
     Buttons.add(new Button(-width / 2 + 50, -height / 2 + (i * 50 + 50) + spacing, i));
     spacing += 20;
   }
@@ -616,6 +624,42 @@ void curvedMode() {
 
   endShape();
 }
+
+void rainbowMode() {
+  colorMode(HSB, 360, 360, 360);
+  for (int i = 0; i < 8; i++) {
+    Dots.get(i).setPos(inputs[i]);
+    strokeWeight(5);
+    stroke(360, 0, 360);
+    polygon(0, 0, 80, 8);
+    strokeWeight(10);
+    rainbowLine(int(cos(radians(45 + 45 * i - 1))*80), int(sin(radians(45 + 45 * i - 1))*80), int(Dots.get(i).getPos().x), int(Dots.get(i).getPos().y));
+  }
+  
+  
+  colorMode(RGB, 255, 255, 255);
+}
+
+void polygon(float x, float y, float radius, int npoints) {
+  float angle = TWO_PI / npoints;
+  beginShape();
+  for (float a = angle / 2; a < TWO_PI + angle; a += angle) {
+    float sx = x + cos(a) * radius;
+    float sy = y + sin(a) * radius;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
+}
+
+//Need to be in HSB mode
+void rainbowLine(int x1, int y1, int x2, int y2) {
+  float d = dist(x1, y1, x2, y2);
+  for (int i = 0; i<d; i++) {
+    stroke(i/1.5 % 360, 360, 360);
+    point(x1 + (x2-x1)/d*i, y1 + (y2-y1)/d*i);
+  }
+}
+
 void drawEllipse() {
   fill(255, 0, 0, 50);
   ellipse(0, 0, 500, 500);
