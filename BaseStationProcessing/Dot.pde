@@ -52,7 +52,7 @@ class Dot {
 
     if (state == 1) {
       stroke(255);
-      strokeWeight(8);
+      strokeWeight(16);
       fill(255);
       setPos(300);
     } else {
@@ -63,7 +63,7 @@ class Dot {
   }
 
   void displayState(float yoffset, float yscale) {
-    textSize(25);
+    textSize(60);
     fill(255);
     text(state, endCoord.x * 350  - textWidth('0') / 2, endCoord.y * yscale * 350 + yoffset + textAscent() / 2);
   }
