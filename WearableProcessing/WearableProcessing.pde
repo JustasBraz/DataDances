@@ -7,7 +7,7 @@
 import processing.serial.*;
 
 //DECLARING THE NUMBER OF USERS
-int No_Users=1;
+int No_Users=2;
 //A LIST OF CONNECTED PORTS ON THE PC (UNIQUE FOR EACH MACHINE)
 String [] verifiedPorts={"COM4", "COM8"};//{"COM11", "COM13", "COM18", "COM20", "COM23", "COM25"};
 
@@ -22,7 +22,7 @@ int activeUsers=0;
 ArrayList<Button> Buttons;
 
 int mode=2;
-int NO_BUTTONS=7;
+int NO_BUTTONS=10;
 float [][] init;
 
 Tile [][] lowResgrid;
@@ -60,7 +60,7 @@ void setup()
     dataIn = new String[No_Users];
     init = new float[No_Users][3];
     for (int i = 0; i < No_Users; i++) {
-      users[i]=new User(int(random(0, 255)), 50);
+      users[i]=new User(int(i * 50), 50);
       init[i] = new float[] {random(0, 20000), random(0, 20000), random(0, 20000)};
     }
   }
@@ -122,6 +122,7 @@ void draw()
     case 2:
       //Rainbow1
       translate(0, 0);
+      background(0, 0, 200);
       users[userID].move(1, "Line");
       break;
     case 3:
@@ -139,11 +140,19 @@ void draw()
       break;
     case 6:
       //FreeFlow
-      users[userID].move("Line");
+      users[userID].move("Line", true);
       break;
     case 7:
       //FreeFlow
-      users[userID].move("Point");
+      users[userID].move("Point", true);
+      break;
+    case 8:
+      //FreeFlow with Size
+      users[userID].move("Line", false);
+      break;
+    case 9:
+      //FreeFlow with Size
+      users[userID].move("Point", false);
       break;
     default:
       break;
@@ -188,7 +197,7 @@ void attemptConnection() {
       //try every single port on the list until we get the required number of devices connected
       try {
         myPorts[activeUsers]= new Serial(this, verifiedPorts[i], 9600); //9600 as it must match the baud rate on the Arduinos
-        users[activeUsers]=new User(int(random(0, 255)), 50);
+        users[activeUsers]=new User(int(50 * i), 50);
         activeUsers++;
         println("Success!");
         println("Awaiting connections: "+activeUsers+"/"+No_Users);
@@ -291,7 +300,7 @@ void initGUI(int no_buttons) {
   int spacing=10;
   for (int i=0; i<no_buttons; i++) {
     Buttons.add(new Button(-width/2+50, -height/2+(i*50+50)+spacing, i));
-    spacing+=20;
+    spacing+=15;
   }
 }
 

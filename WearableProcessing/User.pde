@@ -6,7 +6,9 @@ class User {
   float scale=200;
   //Most probable reason for multi agent radii bug :
   //the following has to be put in User() and made private.
-  int deleteAfter = 3000; //Delete stroke after x milliseconds
+  int deleteAfter = 5000; //Delete stroke after x milliseconds
+  int fadeAfter = 1000;
+  float fadeIntensity = 0.9;
   float radius=30;
 
   float yaw, pitch, roll=0;
@@ -15,7 +17,7 @@ class User {
   String identification;
 
   float dist;
-  int unique_color= int(random(0, 255));//unique color for each device
+  int unique_color= ColorSingleton.getInstance().getColor();//unique color for each device
 
   int numReadings = 12;//the length of the rolling average array
 
@@ -41,20 +43,21 @@ class User {
       readings_X[thisReading] = 0;
     }
   }
-
+  
   //visualises the data into circles on screen
-  void move(String pen) {    
+  void move(String pen, Boolean classic) {    
     if (pen.equals("Point")) {
-      old_moves.add(new AgeObject(new StrokeObject(initial_color, unique_color, radius, alpha, radius, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
+      old_moves.add(new AgeObject(new StrokeObject(unique_color, 255, 255, alpha, radius, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
       
     }
     if (pen.equals("Line")) {
-      old_moves.add(new AgeObject(new StrokeObject(initial_color, unique_color, radius, 255, radius, py, pp, yaw*scale, pitch*scale)));    
+      old_moves.add(new AgeObject(new StrokeObject(unique_color, 255, 255, 255, radius, py, pp, yaw*scale, pitch*scale)));    
       pp=pitch*scale;
       py=yaw*scale;
     }
-    findDelta(yaw*scale, pitch*scale) ;
-    
+    if (!classic) {
+      findDelta(yaw*scale, pitch*scale) ;
+    }
     Iterator<AgeObject> oldMovesIterator = old_moves.iterator();
       
       while (oldMovesIterator.hasNext()) {
@@ -72,11 +75,21 @@ class User {
   //visualises the data into circles on screen
   void move(int RGB_bits, String pen) {
     if (pen.equals("Point")) {
-      old_moves.add(new AgeObject(new StrokeObject(getRainbow(RGB_bits), 360, 360, alpha, 30, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
-      
+      if (RGB_bits == 1) {
+        int val = getRainbow(RGB_bits);
+        old_moves.add(new AgeObject(new StrokeObject(val, val, val == 360 ? 0 : 360, alpha, 30, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
+      } else {
+        old_moves.add(new AgeObject(new StrokeObject(getRainbow(RGB_bits), 360, 360, alpha, 30, yaw*scale, pitch*scale, yaw*scale, pitch*scale)));
+      }
     }
     if (pen.equals("Line")) {
-      old_moves.add(new AgeObject(new StrokeObject(getRainbow(RGB_bits), 360, 360, 255, 20, py, pp, yaw*scale, pitch*scale)));    
+      if (RGB_bits == 1) {
+        int val = getRainbow(RGB_bits);
+        old_moves.add(new AgeObject(new StrokeObject(val, val, val == 360 ? 0 : 360, 255, 20, py, pp, yaw*scale, pitch*scale)));    
+      } else {
+        old_moves.add(new AgeObject(new StrokeObject(getRainbow(RGB_bits), 360, 360, 255, 20, py, pp, yaw*scale, pitch*scale)));    
+      }
+      
       pp=pitch*scale;
       py=yaw*scale;
     }
@@ -84,6 +97,9 @@ class User {
       
       while (oldMovesIterator.hasNext()) {
         AgeObject obj = oldMovesIterator.next();
+        if (obj.age() > fadeAfter) {
+          obj.stroke.updateAlpha(fadeIntensity);
+        }
         if (obj.age() > deleteAfter) {
           oldMovesIterator.remove();
         } else {
@@ -105,6 +121,9 @@ class User {
       this.x = x;
       this.y = y;
     }
+    void updateAlpha(float alpha) {
+      this.alpha *= alpha;
+    }
     void draw(String pen) {
       stroke(v1, v2, v3, alpha);
       strokeWeight(weight);
@@ -113,7 +132,6 @@ class User {
       } else {
         line(px, py, x, y);
       }
-      
     }
   }
   
@@ -201,7 +219,7 @@ class User {
     if (triggerCounter > 64) {
       triggerCounter = 0;
       if (fakeLoc == 0) {
-        fakeLoc = 255;
+        fakeLoc = 360;
       } else {
         fakeLoc = 0;
       }
