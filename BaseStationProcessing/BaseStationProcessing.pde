@@ -566,7 +566,7 @@ void radarMode() {
     vertex(Dots.get(i).getPos().x, Dots.get(i).getPos().y);
     vertexFiller(offsetAngles[i], inputs[i], inputs[next], 2);
   }
-
+  rotate(HALF_PI / 2);
   endShape();
 }
 void sharpMode() {
