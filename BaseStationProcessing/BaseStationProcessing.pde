@@ -487,10 +487,12 @@ char displayBinaryStates(boolean binaryMode, boolean denaryMode, boolean asciiMo
   
   String[] states = new String[8];
   String[] IDs = new String[8];
+  int[] stateOrder = {4,5,6,7,0,1,2,3}; 
+  
   for (int i = 0; i < 8; i++) {
     //binaryStates=replaceCharAt(binaryStates, i, char(Dots.get(i).state));
-    states[i] = str(Dots.get(i).state);
-    IDs[i] = str(Dots.get(i).name);
+    states[i] = str(Dots.get(stateOrder[i]).state);
+    IDs[i] = str(Dots.get(stateOrder[i]).name);
   }
   String binaryStates = join(states, " ");
   String binaryStatesRaw = join(states, "");
