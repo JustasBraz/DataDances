@@ -10,6 +10,8 @@ import java.util.Arrays;
 AudioContext ac;
 Glide carrierFreq, modFreqRatio;
 
+String COM = "COM44";
+
 //Declaring a Serial port object
 Serial Port_1;
 
@@ -41,6 +43,7 @@ boolean swing;
 String session;
 
 boolean SIMULATION = false;
+boolean MANUAL_COM = true;
 boolean RECORDING = false;
 void setup() {
   keysDown = new HashSet < Character > ();
@@ -59,7 +62,12 @@ void setup() {
   //otherwise, to conduct tests in simulated mode, set SIMULATION to true
 
   if (!SIMULATION) {
-      String port = scan(9600);
+      if (MANUAL_COM) {
+        println("Manual COM Port: " + COM);
+        delay(1000);
+        attemptConnection(COM, 9600);
+      } else {
+        String port = scan(9600);
       if (port == null) {
         println("**************************************");
         println("      FAILED TO FIND BASESTATION      ");
@@ -70,6 +78,8 @@ void setup() {
         delay(1000);
         attemptConnection(port, 9600);
       }
+      }
+      
   } else {
     for (int i = 0; i < 8; i++) {
       sim_init[i] = random(0, 20000);
