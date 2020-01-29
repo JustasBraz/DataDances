@@ -10,7 +10,7 @@ import java.util.Arrays;
 AudioContext ac;
 Glide carrierFreq, modFreqRatio;
 
-String COM = "COM44";
+String COM = "COM4";
 
 //Declaring a Serial port object
 Serial Port_1;
