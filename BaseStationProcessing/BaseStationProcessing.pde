@@ -3,12 +3,16 @@
 
 import processing.serial.*;
 import java.util.HashSet;
-import beads.*;
 import java.util.Arrays;
 
-//Declaring objects used for the sound library
-AudioContext ac;
-Glide carrierFreq, modFreqRatio;
+//IMPORT MINIM LIBRARY FROM Sketch>Import Library>Add Library>minim
+import ddf.minim.analysis.*;
+import ddf.minim.*;
+import ddf.minim.signals.*;
+ 
+Minim minim;
+AudioOutput out;
+
 
 String COM = "COM4";
 
@@ -33,7 +37,7 @@ float[] inputs = new float[8]; //={Pos1, Pos2, Pos3, Pos4, Pos5, Pos6, Pos7, Pos
 int[] offsetAngles = {135, 180, 225, 270, 315, 360, 45, 90};
 
 float simulateStep = 0;
-int NO_BUTTONS=10;
+int NO_BUTTONS=12;
 
 int mode = -1;
 int visualAid = -1;
@@ -50,6 +54,8 @@ boolean RECORDING = false;
 int prev_width;
 int prev_heigth;
 
+MyNote[] notes = new MyNote[8];
+
 void setup() {
   keysDown = new HashSet < Character > ();
   Dots = new ArrayList < Dot > ();
@@ -59,14 +65,22 @@ void setup() {
   //constant handshaking with the Arduino
   frameRate(40);
 
-  size(800, 800);
+  size(800, 900);
   surface.setTitle("Base Station sketch");
   surface.setResizable(true);
-  surface.setLocation(50, 50);
+  surface.setLocation(50, 10);
  
   prev_width=width;
   prev_heigth=height;
   //fullScreen();
+  
+  //MINIM setup
+  minim = new Minim(this);
+  out = minim.getLineOut(Minim.STEREO);
+  for(int i=0; i<8; i++){
+  notes[i]= new MyNote(i,0.2);
+  }
+ 
 
   printArray(Serial.list()); //displays all available ports; quite useful for debugging.
   //IF USING THE ACTUAL BASE STATION, LEAVE UNCOMMENTED
@@ -97,8 +111,6 @@ void setup() {
   }
   //The folder to save screen-captured images
   session = "test2/";
-
-  soundSetup();
 
   //Setting up GUI and the spacing between buttons
   initGUI(NO_BUTTONS);
@@ -175,69 +187,56 @@ void draw() {
   switch (mode) {
 
   case 0:
-    ac.stop();
     sharpMode();
     break;
   case 1:
-    ac.stop();
     flowerMode();
     break;
   case 2:
-    ac.stop();
     radarMode();
     break;
   case 3:
-    ac.stop();
     curvedMode();
     break;
   case 4:
-    ac.stop();
     background(0);
     rainbowMode();
     GUI("inverse");
     break;
   case 5: // Just the lines
     background(0);
-    ac.stop();
     binaryMode(false, false, false);
     GUI("inverse");
     break;
   case 6: // Lines with 8 bit binary
     background(0);
-    ac.stop();
     binaryMode(true, false, false);
     GUI("inverse");
     break;
   case 7: // Lines with 8 bit binary + denary
     background(0);
-    ac.stop();
     binaryMode(true, true, false);
     GUI("inverse");
     break;
   case 8: // Lines with 8 bit binary + ascii
     background(0);
-    ac.stop();
     binaryMode(true, false, true);
     GUI("inverse");
     break;
   case 9: // Lines with 8 bit binary + ascii + denary
     background(0);
-    ac.stop();
     binaryMode(true, true, true);
     GUI("inverse");
     break;
   case 10:
     background(0);
-    ac.stop();
     spellingMode();
     GUI("inverse");
     break;
   case 11:
-    ac.start();
     octaveMode();
     break;
   default:
-    ac.stop();
     background(0);
     rainbowMode();
     GUI("inverse");
@@ -249,10 +248,10 @@ void draw() {
   //one displays the end points of sensor values
   //and another initiates the matchingShape minigame
   switch (visualAid) {
-  case 11:
+  case 12:
     drawDots();
     break;
-  case 12:
+  case 13:
     matchingShape();
     break;
 
@@ -302,7 +301,7 @@ void initGUI(int NumButtons) {
   int spacing = 10;
   for (int i = 0; i < NumButtons; i++) {
     Buttons.add(new Button(-width / 2 + 50, -height / 2 + (i * 50 + 50) + spacing, i));
-    spacing += 20;
+    spacing += 10;
   }
 }
 
@@ -329,30 +328,14 @@ void GUI(String colorMode) {
   line(startX, startY - 30, startX + 10, startY - 20);
   line(startX - 10, startY, startX + 10, startY);
 }
+//void stop()
+//{
+//  out.close();
+//  minim.stop();
+ 
+//  super.stop();
+//}
 
-//Initiates the sound library, copied from beads library example #3
-void soundSetup() {
-  ac = new AudioContext();
-  carrierFreq = new Glide(ac, 500);
-  modFreqRatio = new Glide(ac, 1);
-  Function modFreq = new Function(carrierFreq, modFreqRatio) {
-    public float calculate() {
-      return x[0] * x[1];
-    }
-  };
-  WavePlayer freqModulator = new WavePlayer(ac, modFreq, Buffer.SINE);
-  Function carrierMod = new Function(freqModulator, carrierFreq) {
-    public float calculate() {
-      return x[0] * 400.0 + x[1];
-    }
-  };
-  WavePlayer wp = new WavePlayer(ac, carrierMod, Buffer.SINE);
-  Gain g = new Gain(ac, 1, 0.1);
-  g.addInput(wp);
-  ac.out.addInput(g);
-  ac.start();
-  ac.stop();
-}
 
 //draws curvy lines to match funky sound effects
 void curvyLine(float xStart, float yStart, float xFin, float yFin, float step) {
@@ -370,7 +353,7 @@ void curvyLine(float xStart, float yStart, float xFin, float yFin, float step) {
 
   if (swing) {
     for (int i = 0; i < lerps.length; i++) {
-      vertex(lerps[i].x + random(-5, 5) * 2, lerps[i].y + cos(random(-5, 5)) * 2);
+      vertex(lerps[i].x + cos(random(-5, 5)) * 2, lerps[i].y + cos(random(-5, 5)) * 2);
     }
     vertex(fin.x, fin.y);
   } else {
@@ -384,7 +367,7 @@ void octaveMode() {
   strokeWeight(1);
 
   for (int i = 0; i < 8; i++) {
-    checkOctaveThreshold(inputs[i], i + 1);
+    checkOctaveThreshold(inputs[i], i );
     curvyLine(0, 0, cos(radians(90 + 45 * i)) * inputs[i], sin(radians(90 + 45 * i)) * inputs[i], increment);
   }
   stroke(200);
@@ -396,15 +379,14 @@ void checkOctaveThreshold(float input, int sensor) {
   if (input < 200) {
     swing = true;
     color c = color(random(0, 255), random(0, 255), random(0, 255), 75);
-    float sensor_values[] = {0.001f, 0.01f, 0.05f, 0.1f, 0.25f, 0.5f, 0.8f, 1.2f};
-
+    int [] pitches={262,295,330,370,415,466,523,587};
     stroke(c);
     strokeWeight(8);
-    if (sensor < 1 || sensor > 8) {
-      ac.stop();
-    } else {
-      carrierFreq.setValue(sensor_values[sensor - 1] * 1000 + 50);
-    }
+   
+      if(millis()-notes[sensor].lastActivated>500){
+      notes[sensor]=new MyNote(pitches[sensor],0.2);
+      }
+    
   } else {
 
     swing = false;
