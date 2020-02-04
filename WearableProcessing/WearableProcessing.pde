@@ -37,9 +37,17 @@ int rowsHighRes;
 int colsLowRes;
 int rowsLowRes;
 
+int prev_width;
+int prev_heigth;
+
 void setup()
 { 
   size (700, 700);
+  surface.setTitle("Wearables sketch");
+  surface.setResizable(true);
+  surface.setLocation(100, 100);
+
+
   colorMode(HSB, 360, 360, 360);
 
   //fullScreen();
@@ -66,17 +74,23 @@ void setup()
   }
 
   initGUI(NO_BUTTONS);
-  lowResgrid=initTiles(50);
-  highResgrid=initTiles(20);
-  colsHighRes=ceil(width/20);
-  rowsHighRes=ceil(height/20);
-  colsLowRes=ceil(width/50);
-  rowsLowRes=ceil(height/50);
+  initPixelGrid();
   println("Entering draw");
+
+  prev_width=width;
+  prev_heigth=height;
 }
 
 void draw()
 { 
+  if (prev_width!=width||prev_heigth!=height) {
+    initGUI(NO_BUTTONS);
+    initPixelGrid();
+    prev_width=width;
+    prev_heigth=height;
+  }
+
+
   clear();
   background(360);
   //TODO: simulation mode
@@ -100,7 +114,7 @@ void draw()
     users[userID].putData(dataIn[userID]);
     //Then we visualise it by drawing circles
     //in the appropriate coordinates
-    
+
     switch(mode) {
 
     case 0:
@@ -215,6 +229,15 @@ void attemptConnection() {
     ports.bufferUntil(13); //13 is the ASCII linefeed value
   }
 }
+
+void initPixelGrid() {
+  lowResgrid=initTiles(50);
+  highResgrid=initTiles(20);
+  colsHighRes=ceil(width/20);
+  rowsHighRes=ceil(height/20);
+  colsLowRes=ceil(width/50);
+  rowsLowRes=ceil(height/50);
+}
 void record() {
   if (frameCount%13==0) {
     saveFrame(session+frameCount+".jpg");
@@ -291,12 +314,13 @@ void cleanCanvas() {
 }
 
 void clearUsers() {
-  for (User user: users) {
+  for (User user : users) {
     user.clear();
   }
 }
 
 void initGUI(int no_buttons) {
+  Buttons = new ArrayList<Button>();
   int spacing=10;
   for (int i=0; i<no_buttons; i++) {
     Buttons.add(new Button(-width/2+50, -height/2+(i*50+50)+spacing, i));

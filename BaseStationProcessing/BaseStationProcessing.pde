@@ -33,6 +33,7 @@ float[] inputs = new float[8]; //={Pos1, Pos2, Pos3, Pos4, Pos5, Pos6, Pos7, Pos
 int[] offsetAngles = {135, 180, 225, 270, 315, 360, 45, 90};
 
 float simulateStep = 0;
+int NO_BUTTONS=10;
 
 int mode = -1;
 int visualAid = -1;
@@ -42,9 +43,13 @@ boolean swing;
 
 String session;
 
-boolean SIMULATION = false;
+boolean SIMULATION = true;
 boolean MANUAL_COM = true;
 boolean RECORDING = false;
+
+int prev_width;
+int prev_heigth;
+
 void setup() {
   keysDown = new HashSet < Character > ();
   Dots = new ArrayList < Dot > ();
@@ -54,7 +59,13 @@ void setup() {
   //constant handshaking with the Arduino
   frameRate(40);
 
-  size(1000, 1000);
+  size(800, 800);
+  surface.setTitle("Base Station sketch");
+  surface.setResizable(true);
+  surface.setLocation(50, 50);
+ 
+  prev_width=width;
+  prev_heigth=height;
   //fullScreen();
 
   printArray(Serial.list()); //displays all available ports; quite useful for debugging.
@@ -62,12 +73,12 @@ void setup() {
   //otherwise, to conduct tests in simulated mode, set SIMULATION to true
 
   if (!SIMULATION) {
-      if (MANUAL_COM) {
-        println("Manual COM Port: " + COM);
-        delay(1000);
-        attemptConnection(COM, 9600);
-      } else {
-        String port = scan(9600);
+    if (MANUAL_COM) {
+      println("Manual COM Port: " + COM);
+      delay(1000);
+      attemptConnection(COM, 9600);
+    } else {
+      String port = scan(9600);
       if (port == null) {
         println("**************************************");
         println("      FAILED TO FIND BASESTATION      ");
@@ -78,8 +89,7 @@ void setup() {
         delay(1000);
         attemptConnection(port, 9600);
       }
-      }
-      
+    }
   } else {
     for (int i = 0; i < 8; i++) {
       sim_init[i] = random(0, 20000);
@@ -91,7 +101,7 @@ void setup() {
   soundSetup();
 
   //Setting up GUI and the spacing between buttons
-  initGUI();
+  initGUI(NO_BUTTONS);
 
   //Initiating the array that will keep the 8 sensor values and 
   //transform them into XY coordinates
@@ -115,34 +125,40 @@ String scan(int baud) {
       serial.bufferUntil(13);
       Thread t = new Thread(new WriteThread(serial));
       t.start();
-      
+
       delay(1000);
       t.interrupt();
       String message = lastMessage;
       serial.stop();
       if (message != null) {
         String items[] = split(message, '\t');
-        
+
         if (items.length == 17) {
           println("Base Station");
           printSerial = true;
           return port;
         } else {
-           println("Found Unknwon DataDance of " + items.length); 
+          println("Found Unknwon DataDance of " + items.length);
         }
       } else {
         println("Unknown - " + message);
       }
-    } catch (Exception e) {
+    } 
+    catch (Exception e) {
       println("Busy");
     }
-    
   }
   printSerial = true;
   return null;
 }
 
 void draw() {
+  if (prev_width!=width||prev_heigth!=height) {
+    initGUI(NO_BUTTONS);
+    prev_width=width;
+    prev_heigth=height;
+  }
+  
   if (SIMULATION) {
     simulateData();
   } else {
@@ -158,74 +174,74 @@ void draw() {
   //Selects the active mode (activated but the buttons on screen):
   switch (mode) {
 
-    case 0:
-      ac.stop();
-      sharpMode();
-      break;
-    case 1:
-      ac.stop();
-      flowerMode();
-      break;
-    case 2:
-      ac.stop();
-      radarMode();
-      break;
-    case 3:
-      ac.stop();
-      curvedMode();
-      break;
-    case 4:
-      ac.stop();
-      background(0);
-      rainbowMode();
-      GUI("inverse");
-      break;
-    case 5: // Just the lines
-      background(0);
-      ac.stop();
-      binaryMode(false, false, false);
-      GUI("inverse");
-      break;
-    case 6: // Lines with 8 bit binary
-      background(0);
-      ac.stop();
-      binaryMode(true, false, false);
-      GUI("inverse");
-      break;
-    case 7: // Lines with 8 bit binary + denary
-      background(0);
-      ac.stop();
-      binaryMode(true, true, false);
-      GUI("inverse");
-      break;
-    case 8: // Lines with 8 bit binary + ascii
-      background(0);
-      ac.stop();
-      binaryMode(true, false, true);
-      GUI("inverse");
-      break;
-    case 9: // Lines with 8 bit binary + ascii + denary
-      background(0);
-      ac.stop();
-      binaryMode(true, true, true);
-      GUI("inverse");
-      break;
-    case 10:
-      background(0);
-      ac.stop();
-      spellingMode();
-      GUI("inverse");
-      break;
-    case 11:
-      ac.start();
-      octaveMode();
-      break;
-    default:
-      ac.stop();
-      background(0);
-      rainbowMode();
-      GUI("inverse");
-      break;
+  case 0:
+    ac.stop();
+    sharpMode();
+    break;
+  case 1:
+    ac.stop();
+    flowerMode();
+    break;
+  case 2:
+    ac.stop();
+    radarMode();
+    break;
+  case 3:
+    ac.stop();
+    curvedMode();
+    break;
+  case 4:
+    ac.stop();
+    background(0);
+    rainbowMode();
+    GUI("inverse");
+    break;
+  case 5: // Just the lines
+    background(0);
+    ac.stop();
+    binaryMode(false, false, false);
+    GUI("inverse");
+    break;
+  case 6: // Lines with 8 bit binary
+    background(0);
+    ac.stop();
+    binaryMode(true, false, false);
+    GUI("inverse");
+    break;
+  case 7: // Lines with 8 bit binary + denary
+    background(0);
+    ac.stop();
+    binaryMode(true, true, false);
+    GUI("inverse");
+    break;
+  case 8: // Lines with 8 bit binary + ascii
+    background(0);
+    ac.stop();
+    binaryMode(true, false, true);
+    GUI("inverse");
+    break;
+  case 9: // Lines with 8 bit binary + ascii + denary
+    background(0);
+    ac.stop();
+    binaryMode(true, true, true);
+    GUI("inverse");
+    break;
+  case 10:
+    background(0);
+    ac.stop();
+    spellingMode();
+    GUI("inverse");
+    break;
+  case 11:
+    ac.start();
+    octaveMode();
+    break;
+  default:
+    ac.stop();
+    background(0);
+    rainbowMode();
+    GUI("inverse");
+    break;
   }
 
   //In addition to different modes of visualisations
@@ -233,15 +249,15 @@ void draw() {
   //one displays the end points of sensor values
   //and another initiates the matchingShape minigame
   switch (visualAid) {
-    case 11:
-      drawDots();
-      break;
-    case 12:
-      matchingShape();
-      break;
+  case 11:
+    drawDots();
+    break;
+  case 12:
+    matchingShape();
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   if (RECORDING) {
@@ -254,7 +270,7 @@ void attemptConnection(String COM, int baud) {
 }
 //Function displays end point coordinates
 void drawDots() {
-  for (Dot d: Dots) {
+  for (Dot d : Dots) {
     d.display();
   }
 }
@@ -266,7 +282,7 @@ void maintainConnections() {
 void matchingShape() {
   boolean allTrue = true;
 
-  for (Dot d: Dots) {
+  for (Dot d : Dots) {
 
     allTrue = allTrue && d.matchingEllipse();
   }
@@ -281,9 +297,10 @@ void record() {
     saveFrame(session + frameCount + ".jpg");
   }
 }
-void initGUI() {
+void initGUI(int NumButtons) {
+  Buttons = new ArrayList < Button > ();
   int spacing = 10;
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < NumButtons; i++) {
     Buttons.add(new Button(-width / 2 + 50, -height / 2 + (i * 50 + 50) + spacing, i));
     spacing += 20;
   }
@@ -291,7 +308,7 @@ void initGUI() {
 
 void GUI(String colorMode) {
   textSize(18);
-  for (Button b: Buttons) {
+  for (Button b : Buttons) {
 
     if (b.activate(colorMode) && mousePressed) {
       mode = b.getMode();
@@ -304,14 +321,13 @@ void GUI(String colorMode) {
     stroke(255, 255, 255);
   }
   strokeWeight(5);
-  int startX = 450;
-  int startY = -450;
-  
+  int startX = width-int(width/1.9);
+  int startY = (-1)*(height-int(height/1.8));
+ 
   line(startX, startY, startX, startY - 30);
   line(startX, startY - 30, startX - 10, startY - 20);
   line(startX, startY - 30, startX + 10, startY - 20);
   line(startX - 10, startY, startX + 10, startY);
-  
 }
 
 //Initiates the sound library, copied from beads library example #3
@@ -436,10 +452,10 @@ void spellingMode() {
     line(0, 50, Dots.get(i).getPos().x, Dots.get(i).getPos().y * 0.8 + 50);
   }
   char curChar = displayBinaryStates(true, true, true);
-  
 
-  
-  
+
+
+
   int loc = -350;
   for (int i = 0; i < spellingModeString.length(); i++) {
     if (spellingModeResult.charAt(i) == '_') {
@@ -449,7 +465,7 @@ void spellingMode() {
         fill(100);
       }
     } else if (spellingModeResult.charAt(i) == spellingModeString.charAt(i)) {
-      fill(0, 255, 0); 
+      fill(0, 255, 0);
     } else {
       fill(255, 0, 0);
     }
@@ -457,34 +473,33 @@ void spellingMode() {
     text(spellingModeString.charAt(i), loc, -350);
     float middleLoc = loc += textWidth(spellingModeString.charAt(i)) / 2;
     loc += textWidth(spellingModeString.charAt(i)) + 5;
-    
+
     textSize(20);
     fill(175);
     middleLoc -= textWidth(i==spellingModeCur ? curChar : spellingModeResult.charAt(i)) / 2;
-    text(i==spellingModeCur ? curChar : spellingModeResult.charAt(i), middleLoc, -300);    
+    text(i==spellingModeCur ? curChar : spellingModeResult.charAt(i), middleLoc, -300);
   }
 
-  
+
   if (System.currentTimeMillis() > spellingModeNextTime) {
-       if (spellingModeCur < spellingModeString.length()) {
-         spellingModeResult = replaceCharAt(spellingModeResult, spellingModeCur, curChar);
-         spellingModeCur += 1;
-       } else {
-         //New word
-         spellingModeString = spellingModeWordList[int(random(0, spellingModeWordListLength))];
-         StringBuilder sb = new StringBuilder();
-          for (int i = 0; i < spellingModeString.length(); i++) {
-            sb.append('_');
-          }
-          spellingModeResult = sb.toString();
-          spellingModeCur = 0;
-       }
-      
-      
-      spellingModeNextTime = System.currentTimeMillis() + (spellingModeCur == spellingModeString.length() ? spellingModeDelay * 2 : spellingModeDelay);
-      
+    if (spellingModeCur < spellingModeString.length()) {
+      spellingModeResult = replaceCharAt(spellingModeResult, spellingModeCur, curChar);
+      spellingModeCur += 1;
+    } else {
+      //New word
+      spellingModeString = spellingModeWordList[int(random(0, spellingModeWordListLength))];
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < spellingModeString.length(); i++) {
+        sb.append('_');
+      }
+      spellingModeResult = sb.toString();
+      spellingModeCur = 0;
     }
-  
+
+
+    spellingModeNextTime = System.currentTimeMillis() + (spellingModeCur == spellingModeString.length() ? spellingModeDelay * 2 : spellingModeDelay);
+  }
+
   stroke(0);  
   strokeWeight(1);
 }
@@ -502,11 +517,11 @@ float rollingAverage(int id, float input, float count) {
 
 char displayBinaryStates(boolean binaryMode, boolean denaryMode, boolean asciiMode) {
   boolean greyTextBinary = false;
-  
+
   String[] states = new String[8];
   String[] IDs = new String[8];
-  int[] stateOrder = {4,5,6,7,0,1,2,3}; 
-  
+  int[] stateOrder = {4, 5, 6, 7, 0, 1, 2, 3}; 
+
   for (int i = 0; i < 8; i++) {
     //binaryStates=replaceCharAt(binaryStates, i, char(Dots.get(i).state));
     states[i] = str(Dots.get(stateOrder[i]).state);
@@ -525,17 +540,17 @@ char displayBinaryStates(boolean binaryMode, boolean denaryMode, boolean asciiMo
   if (asciiMode) {
     text(char(unbinary(binaryStatesRaw)), -70-90, 400);
   }
-  
+
   textSize(25);
   if (binaryMode) {
     text(binaryStates, 300, 350);
   }
-  
+
   fill(255, 50);
   if (greyTextBinary) {
     text(dotIDs, 300, 400);
   }
- 
+
   return (char(unbinary(binaryStatesRaw)));
 }
 
@@ -592,7 +607,8 @@ void sharpMode() {
   fill(150, 0, 0);
 
   beginShape();
-  stroke(filler, alpha);
+  //stroke(filler, alpha);
+  noStroke();
 
   for (int i = 0; i < 8; i++) {
     //println(inputs[i]);
@@ -606,7 +622,8 @@ void curvedMode() {
   fill(150, 150, 0);
 
   beginShape();
-  stroke(filler, alpha);
+  //stroke(filler, alpha);
+  noStroke();
   //first and last vertices get called two times to open and close the shape
   curveVertex(Dots.get(0).getPos().x, Dots.get(0).getPos().y);
 
@@ -645,8 +662,8 @@ void rainbowMode() {
     strokeWeight(10);
     rainbowLine(int(cos(radians(45 + 45 * (i + 1)))*80), int(sin(radians(45 + 45 * (i + 1)))*80), int(cos(radians(45 + 45 * (i + 1)))*80) + int(Dots.get(i).getPos().x), int(sin(radians(45 + 45 * (i + 1)))*80) + int(Dots.get(i).getPos().y));
   }
-  
-  
+
+
   colorMode(RGB, 255, 255, 255);
 }
 
@@ -779,7 +796,8 @@ void serialEvent(Serial p) {
         }
       }
     }
-  } catch (Exception e) {
+  } 
+  catch (Exception e) {
     println("Error parsing:");
     e.printStackTrace();
   }
